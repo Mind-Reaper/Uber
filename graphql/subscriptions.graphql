@@ -1,0 +1,217 @@
+# this is an auto generated file. This will be overwritten
+
+subscription OnCreateBlog($filter: ModelSubscriptionBlogFilterInput) {
+  onCreateBlog(filter: $filter) {
+    id
+    name
+    posts {
+      nextToken
+      startedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+
+subscription OnUpdateBlog($filter: ModelSubscriptionBlogFilterInput) {
+  onUpdateBlog(filter: $filter) {
+    id
+    name
+    posts {
+      nextToken
+      startedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+
+subscription OnDeleteBlog($filter: ModelSubscriptionBlogFilterInput) {
+  onDeleteBlog(filter: $filter) {
+    id
+    name
+    posts {
+      nextToken
+      startedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+
+subscription OnCreatePost($filter: ModelSubscriptionPostFilterInput) {
+  onCreatePost(filter: $filter) {
+    id
+    title
+    blog {
+      id
+      name
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    comments {
+      nextToken
+      startedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    blogPostsId
+    __typename
+  }
+}
+
+subscription OnUpdatePost($filter: ModelSubscriptionPostFilterInput) {
+  onUpdatePost(filter: $filter) {
+    id
+    title
+    blog {
+      id
+      name
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    comments {
+      nextToken
+      startedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    blogPostsId
+    __typename
+  }
+}
+
+subscription OnDeletePost($filter: ModelSubscriptionPostFilterInput) {
+  onDeletePost(filter: $filter) {
+    id
+    title
+    blog {
+      id
+      name
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    comments {
+      nextToken
+      startedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    blogPostsId
+    __typename
+  }
+}
+
+subscription OnCreateComment($filter: ModelSubscriptionCommentFilterInput) {
+  onCreateComment(filter: $filter) {
+    id
+    post {
+      id
+      title
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      blogPostsId
+      __typename
+    }
+    content
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    postCommentsId
+    __typename
+  }
+}
+
+subscription OnUpdateComment($filter: ModelSubscriptionCommentFilterInput) {
+  onUpdateComment(filter: $filter) {
+    id
+    post {
+      id
+      title
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      blogPostsId
+      __typename
+    }
+    content
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    postCommentsId
+    __typename
+  }
+}
+
+subscription OnDeleteComment($filter: ModelSubscriptionCommentFilterInput) {
+  onDeleteComment(filter: $filter) {
+    id
+    post {
+      id
+      title
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      blogPostsId
+      __typename
+    }
+    content
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    postCommentsId
+    __typename
+  }
+}

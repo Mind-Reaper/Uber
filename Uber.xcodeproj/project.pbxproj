@@ -6,6 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FF81510F2D77E8A600167A26 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = FF81510E2D77E8A600167A26 /* Auth */; };
+		FF8151112D77E8A600167A26 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = FF8151102D77E8A600167A26 /* Functions */; };
+		FF8151132D77E8A600167A26 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = FF8151122D77E8A600167A26 /* PostgREST */; };
+		FF8151152D77E8A600167A26 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = FF8151142D77E8A600167A26 /* Realtime */; };
+		FF8151172D77E8A600167A26 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = FF8151162D77E8A600167A26 /* Storage */; };
+		FF8151192D77E8A600167A26 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = FF8151182D77E8A600167A26 /* Supabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		FFC7788F2D6B6473008FF063 /* Uber.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Uber.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +32,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FF8151132D77E8A600167A26 /* PostgREST in Frameworks */,
+				FF8151112D77E8A600167A26 /* Functions in Frameworks */,
+				FF8151192D77E8A600167A26 /* Supabase in Frameworks */,
+				FF81510F2D77E8A600167A26 /* Auth in Frameworks */,
+				FF8151172D77E8A600167A26 /* Storage in Frameworks */,
+				FF8151152D77E8A600167A26 /* Realtime in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +80,12 @@
 			);
 			name = Uber;
 			packageProductDependencies = (
+				FF81510E2D77E8A600167A26 /* Auth */,
+				FF8151102D77E8A600167A26 /* Functions */,
+				FF8151122D77E8A600167A26 /* PostgREST */,
+				FF8151142D77E8A600167A26 /* Realtime */,
+				FF8151162D77E8A600167A26 /* Storage */,
+				FF8151182D77E8A600167A26 /* Supabase */,
 			);
 			productName = Uber;
 			productReference = FFC7788F2D6B6473008FF063 /* Uber.app */;
@@ -94,6 +115,9 @@
 			);
 			mainGroup = FFC778862D6B6473008FF063;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FF81510D2D77E8A600167A26 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FFC778902D6B6473008FF063 /* Products */;
 			projectDirPath = "";
@@ -255,6 +279,7 @@
 				DEVELOPMENT_TEAM = PLL3ND5MQ6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Help us find you nearby drivers";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -284,6 +309,7 @@
 				DEVELOPMENT_TEAM = PLL3ND5MQ6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Help us find you nearby drivers";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -324,6 +350,50 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FF81510D2D77E8A600167A26 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase-community/supabase-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FF81510E2D77E8A600167A26 /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FF81510D2D77E8A600167A26 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		FF8151102D77E8A600167A26 /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FF81510D2D77E8A600167A26 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		FF8151122D77E8A600167A26 /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FF81510D2D77E8A600167A26 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		FF8151142D77E8A600167A26 /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FF81510D2D77E8A600167A26 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Realtime;
+		};
+		FF8151162D77E8A600167A26 /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FF81510D2D77E8A600167A26 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+		FF8151182D77E8A600167A26 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FF81510D2D77E8A600167A26 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FFC778872D6B6473008FF063 /* Project object */;
 }

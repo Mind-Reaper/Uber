@@ -1,0 +1,24 @@
+{
+    "Version": 5,
+    "ElasticsearchWarning": true,
+    "ResolverConfig": {
+        "project": {
+            "ConflictHandler": "AUTOMERGE",
+            "ConflictDetection": "VERSION"
+        },
+        "models": {
+            "Blog": {
+                "ConflictHandler": "AUTOMERGE",
+                "ConflictDetection": "VERSION"
+            },
+            "Post": {
+                "ConflictHandler": "AUTOMERGE",
+                "ConflictDetection": "VERSION"
+            },
+            "Comment": {
+                "ConflictHandler": "AUTOMERGE",
+                "ConflictDetection": "VERSION"
+            }
+        }
+    }
+}
