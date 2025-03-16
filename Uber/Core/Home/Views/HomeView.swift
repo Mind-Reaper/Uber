@@ -9,18 +9,20 @@ import SwiftUI
 
 struct HomeView: View {
     
-    @EnvironmentObject internal var locationViewModel: LocationSearchViewModel
-    @EnvironmentObject internal var authViewModel: AuthViewModel
+    @EnvironmentObject var locationViewModel: LocationSearchViewModel
+    @EnvironmentObject var authViewModel: AuthViewModel
     
     @State internal var mapState = MapViewState.noInput
     @State internal var showSideMenu = false
     @State internal var offset: CGFloat = 0
     
+    @EnvironmentObject var homeViewModel: HomeViewModel
+    
     @StateObject var router = Router.shared
     
     
     var body: some View {
-        ZStack {
+    
             NavigationStack(path: $router.path) {
                 Group {
                     if authViewModel.userSession == nil {
@@ -54,10 +56,9 @@ struct HomeView: View {
                         }
                     }
                 }
-                .setupNavigationDestinations()
+                .setupNavigationDestinations(authViewModel.currentUser)
             }
             .scrollContentBackground(.hidden)
-        }
     }
 }
 

@@ -36,7 +36,7 @@ struct SettingsView: View {
                 
                 Section {
                     ForEach(SavedLocationViewModel.allCases) {viewModel in
-                        SavedLocationRowView(viewModel: viewModel) {
+                        SavedLocationRowView(viewModel: viewModel, user: user) {
                             Router.shared.path.append(viewModel)
                         }
                     }

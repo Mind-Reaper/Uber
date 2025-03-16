@@ -7,14 +7,32 @@
 
 import Foundation
 
+enum AccountType: String, Codable {
+    case rider
+    case driver
+}
+
 
 struct AppUser: Identifiable, Codable {
     let uid: String
     let email: String
     let firstname: String
     let lastname: String
+    var accountType: AccountType
+    var coordinates: UserCoordinates
     var home: SavedLocation?
     var work: SavedLocation?
+    
+    enum CodingKeys: String, CodingKey {
+        case uid
+        case email
+        case firstname
+        case lastname
+        case accountType = "account_type"
+        case coordinates
+        case home
+        case work
+    }
     
     
     var id : String {
@@ -25,15 +43,23 @@ struct AppUser: Identifiable, Codable {
         "\(firstname) \(lastname)"
     }
     
-    
     static func empty() -> AppUser {
         .init(
             uid: "",
             email: "johndoe@domain.com",
             firstname: "John",
-            lastname: "Doe"
+            lastname: "Doe",
+            accountType: .rider,
+            coordinates: UserCoordinates(latitude: 37.38, longitude: -122.05)
         )
     }
+    
+
+    
+    
+    
+    
+    
 }
 
 struct UpdateUser: Encodable {
@@ -41,4 +67,5 @@ struct UpdateUser: Encodable {
     var lastname: String?
     var home: SavedLocation?
     var work: SavedLocation?
+    var coordinates: UserCoordinates?
 }

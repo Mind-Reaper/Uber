@@ -31,7 +31,7 @@ struct MapViewActionButton: View {
                 .font(.title2)
                 .foregroundColor(Color.theme.foregroundColor)
                 .padding()
-                .background(.ultraThinMaterial)
+                .background(.thickMaterial)
                 .clipShape(Circle())
                 .shadow(radius: 6)
         }

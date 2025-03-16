@@ -9,7 +9,7 @@ import SwiftUI
 
 
 extension View {
-    func setupNavigationDestinations() -> some View {
+    func setupNavigationDestinations(_ user: AppUser?) -> some View {
         self
             .navigationDestination(for: AuthViewType.self) { type in
                 switch type {
@@ -20,8 +20,11 @@ extension View {
                 }
             }
             .navigationDestination(for: SavedLocationViewModel.self) { viewModel in
-                SavedLocationSearchView(savedLocationViewModel: viewModel)
-                    .applyCustomBackground()
+                if let user = user {
+                    SavedLocationSearchView(savedLocationViewModel: viewModel, user: user)
+                        .applyCustomBackground()
+                }
+                
             }
     }
 }

@@ -7,6 +7,7 @@
 
 import Foundation
 import Supabase
+import Combine
 
 
 enum AuthViewType {
@@ -19,6 +20,9 @@ enum AuthViewType {
 class AuthViewModel: ObservableObject {
     @Published var userSession: User?
     @Published var currentUser: AppUser?
+
+    private let userService = SupabaseUserService.shared
+    private var cancellables: Set<AnyCancellable> = []
     
     
     static let usersTable: String = "users"
@@ -35,9 +39,15 @@ class AuthViewModel: ObservableObject {
             do {
                 let result = try await SupabaseManager.auth.signIn(email: email, password: password)
                 
+                
+                
                 await MainActor.run {
                     self.userSession = result.user
                 }
+                
+                self.fetchAppUser()
+                
+                updateUserCoordinates()
                 
             } catch {
                 debugPrint("Failed to sign in with error: \(error.localizedDescription)")
@@ -56,11 +66,29 @@ class AuthViewModel: ObservableObject {
                     self.userSession = user
                 }
                 
-                let appUser = AppUser(uid: user.id.uuidString, email: email, firstname: firstname, lastname: lastname)
+                
+                let appUser = AppUser(
+                    uid: user.id.uuidString,
+                    email: email,
+                    firstname: firstname,
+                    lastname: lastname,
+                    accountType: .rider,
+                    coordinates: UserCoordinates(
+                        latitude: 37.38, longitude: -122.05
+                    )
+                )
+                
+                await MainActor.run {
+                    self.currentUser = appUser
+                    Router.shared.reset()
+                }
                 
                 try await SupabaseManager.table(AuthViewModel.usersTable)
                     .insert(appUser)
                     .execute()
+                
+                
+                updateUserCoordinates()
                 
                 
             } catch {
@@ -75,8 +103,12 @@ class AuthViewModel: ObservableObject {
         Task {
             do {
                 try await SupabaseManager.auth.signOut()
+                
                 await MainActor.run {
+                    Router.shared.reset()
                     self.userSession = nil
+                    self.currentUser = nil
+                  
                 }
                 
             } catch {
@@ -87,31 +119,43 @@ class AuthViewModel: ObservableObject {
     
     
     func fetchAppUser() {
+        userService.$user.sink { user in
+            self.currentUser = user
+        }
+        .store(in: &cancellables)
+    }
+    
+    
+    func updateUserCoordinates() {
+        guard let location = LocationManager.shared.userLocation else { return }
+        
+        debugPrint("User location: \(location)")
+        
         Task {
-            guard let uid = self.userSession?.id.uuidString else { return }
-            
             do {
-                let response = try await SupabaseManager.table(AuthViewModel.usersTable)
-                    .select()
-                    .eq("uid", value: uid)
-                    .single()
+                
+                let coordinates = UserCoordinates(
+                    latitude: location.latitude,
+                    longitude: location.longitude)
+                
+                let updateUser = UpdateUser(
+                    coordinates: coordinates
+                )
+                
+                try await SupabaseManager.table(AuthViewModel.usersTable)
+                    .update(updateUser)
+                    .eq("uid", value: self.userSession?.id)
                     .execute()
                 
-                let userData = response.data
-                let decoder = JSONDecoder()
-                let appUser = try decoder.decode(AppUser.self, from: userData)
-                
-                debugPrint("Appuser: \(appUser)")
-                
                 await MainActor.run {
-                    self.currentUser = appUser
+                    self.currentUser?.coordinates = coordinates
                 }
                 
-                } catch {
-                    debugPrint("Error fetching user data: \(error.localizedDescription)")
-                }
-                
+            } catch {
+                debugPrint("Error updating user coordinates: \(error.localizedDescription)")
             }
         }
- }
+    }
+    
+}
 

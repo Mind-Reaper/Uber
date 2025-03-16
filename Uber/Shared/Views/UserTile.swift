@@ -17,7 +17,9 @@ struct UserTile: View {
     
     var body: some View {
         HStack {
-            Image("male-profile-photo")
+            Image(
+                user.accountType == .driver ?
+                "male-profile-photo" : "male-profile-photo-2")
                 .resizable()
                 .scaledToFill()
                 .clipShape(Circle())

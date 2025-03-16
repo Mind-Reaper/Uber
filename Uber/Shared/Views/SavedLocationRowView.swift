@@ -10,11 +10,12 @@ import SwiftUI
 struct SavedLocationRowView: View {
     
     let viewModel: SavedLocationViewModel
+    let user: AppUser
     var action: () -> Void = { }
 
     
     var body: some View {
-        SettingsTile(icon: viewModel.icon, title: viewModel.title, subtitle: viewModel.subtitle, action: action)
+        SettingsTile(icon: viewModel.icon, title: viewModel.title, subtitle: viewModel.subtitle(for: user), action: action)
           
         
             .listRowSeparator(.hidden,
@@ -25,6 +26,7 @@ struct SavedLocationRowView: View {
 
 #Preview {
     SavedLocationRowView(
-        viewModel: .home
+        viewModel: .home,
+        user: AppUser.empty()
     )
 }

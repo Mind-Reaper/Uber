@@ -21,7 +21,9 @@ struct SettingsTile: View {
         } label: {
             HStack (spacing: 20) {
                 Image(systemName: icon)
-                    .imageScale(.medium)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
                     .font(.title3)
                 
                 VStack (alignment: .leading, spacing: 4) {

@@ -12,10 +12,12 @@ struct SavedLocationSearchView: View {
    
     
     let savedLocationViewModel: SavedLocationViewModel
+    let user: AppUser
     
     
-    @State private var searchText: String = ""
     @StateObject private var viewModel = LocationSearchViewModel()
+    
+   
     
     var body: some View {
         VStack {
@@ -35,7 +37,11 @@ struct SavedLocationSearchView: View {
             
             LocationSearchResultView(viewModel: viewModel, config: .savedLocation(savedLocationViewModel))
             
-        }.navigationTitle(savedLocationViewModel.title)
+        }
+        .onAppear {
+            self.viewModel.queryFragment = (savedLocationViewModel == .home ? user.home?.title : user.work?.title) ?? ""
+        }
+        .navigationTitle(savedLocationViewModel.title)
             .navigationBarTitleDisplayMode(.large)
             .customBackButton()
            
@@ -45,7 +51,7 @@ struct SavedLocationSearchView: View {
 
 #Preview {
     NavigationStack {
-        SavedLocationSearchView(savedLocationViewModel: .home)
+        SavedLocationSearchView(savedLocationViewModel: .home, user: AppUser.empty())
     }
         
 }

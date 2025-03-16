@@ -55,8 +55,10 @@ extension HomeView {
             }
         }
         .onReceive(locationViewModel.$selectedUberLocation) { location in
-            if let location = location {
-                self.mapState = .locationSelected
+            if let _ = location {
+                withAnimation {
+                    self.mapState = .locationSelected
+                }
             }
         }
     }

@@ -11,9 +11,10 @@ import MapKit
 
 struct MapViewRepresentable: UIViewRepresentable {
     let mapView = MKMapView()
-    let locationManager = LocationManager.shared
     @Binding var mapState: MapViewState
     @EnvironmentObject var locationViewModel: LocationSearchViewModel
+    @EnvironmentObject var homeViewModel: HomeViewModel
+    
     
     func makeUIView(context: Context) -> some UIView {
        
@@ -29,6 +30,7 @@ struct MapViewRepresentable: UIViewRepresentable {
         switch mapState {
         case .noInput:
             context.coordinator.clearMapView()
+            context.coordinator.addDriversToMap(homeViewModel.drivers)
             break
         case .searchingForLocation:
             context.coordinator.clearMapView()
@@ -94,6 +96,15 @@ extension MapViewRepresentable {
             return MKOverlayRenderer(overlay: overlay)
         }
         
+        func mapView(_ mapView: MKMapView, viewFor annotation: any MKAnnotation) -> MKAnnotationView? {
+            if let annotation = annotation as? DriverAnnotation {
+                let view = MKAnnotationView(annotation: annotation, reuseIdentifier: "driver")
+                view.image = UIImage(imageLiteralResourceName: "driver-annotation")
+                return view
+            }
+            return nil
+        }
+        
         // MARK: - Helpers
         
         func addAndSelectAnnonation(withCoordinate coordinate: CLLocationCoordinate2D) {
@@ -139,6 +150,13 @@ extension MapViewRepresentable {
                 parent.mapView.setRegion(currentRegion, animated: true)
             }
             
+        }
+        
+        func addDriversToMap(_ drivers: [AppUser]) {
+            let driverAnnotations = drivers.map { driver in
+                DriverAnnotation(driver: driver)
+            }
+            self.parent.mapView.addAnnotations(driverAnnotations)
         }
         
     }

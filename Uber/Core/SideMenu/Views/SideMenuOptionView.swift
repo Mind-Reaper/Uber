@@ -18,8 +18,10 @@ struct SideMenuOptionView: View {
         
         HStack {
             Image(systemName: viewModel.imageName)
-                .font(.title2)
-                .imageScale(.medium)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
+                .font(.title3)
             
             
             Text(viewModel.title)
