@@ -10,15 +10,14 @@ import SwiftUI
 struct RideRequestView: View {
     
     @State private var selectedRideType = RideType.uberX
-    @EnvironmentObject var locationViewModel: LocationSearchViewModel
+    @EnvironmentObject var homeViewModel: HomeViewModel
     
     var body: some View {
     
-            
-            BottomSheet(isPresented: .constant(true),
-                        minHeight: UIScreen.main.bounds.height * 0.6,
-                        maxHeight: UIScreen.main.bounds.height * 0.85
-
+            BottomSheet(
+                isPresented: .constant(true),
+                minHeight: UIScreen.main.bounds.height * 0.6,
+                maxHeight: UIScreen.main.bounds.height * 0.85
             ) {
                 VStack  {
                     HStack {
@@ -40,17 +39,17 @@ struct RideRequestView: View {
                                     .font(.system(size: 16, weight: .semibold))
                                 
                                 Spacer()
-                                Text(locationViewModel.pickupTime?.formattedTime ?? "")
+                                Text(homeViewModel.pickupTime?.formattedTime ?? "")
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.gray)
                             }
                             .padding(.bottom, 10)
                             HStack {
-                                Text(locationViewModel.selectedUberLocation?.title ?? "Destination")
+                                Text(homeViewModel.selectedUberLocation?.title ?? "Destination")
                                     .font(.system(size: 16, weight: .semibold))
                                 
                                 Spacer()
-                                Text(locationViewModel.dropoffTime?.formattedTime ?? "")
+                                Text(homeViewModel.dropoffTime?.formattedTime ?? "")
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.gray)
                             }
@@ -93,7 +92,7 @@ struct RideRequestView: View {
                                                 .font(.system(size: 16, weight: .semibold))
                                             Spacer()
                                             
-                                            Text(locationViewModel.computeRidePrice(forType: type).toCurrency())
+                                            Text(homeViewModel.computeRidePrice(forType: type).toCurrency())
                                                 .font(.system(size: 16, weight: .semibold))
                                         }
                                         
@@ -141,15 +140,10 @@ struct RideRequestView: View {
                         Image(systemName: "chevron.right")
                             .imageScale(.medium)
                             .padding()
-                        
-                        
                     }
                     
-                    
                     Button {
-                        
-                    
-                        
+                        homeViewModel.requestTrip()
                     } label: {
                         Text("Choose \(selectedRideType.description)")
                             .foregroundColor(Color.theme.buttonForegroundColor)

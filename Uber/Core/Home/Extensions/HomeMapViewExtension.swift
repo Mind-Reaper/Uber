@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 extension HomeView {
     var mapView: some View {
         ZStack (alignment: .top) {
@@ -20,7 +19,7 @@ extension HomeView {
                         showSideMenu: showSideMenuBinding,
                         showBackIcon: mapState.notMainView,
                         action: mapState.notMainView ?  {
-                            self.locationViewModel.selectedUberLocation = nil
+                            self.homeViewModel.selectedUberLocation = nil
                             withAnimation {
                                 mapState = mapState == .locationSelected ? .searchingForLocation : .noInput
                             }
@@ -51,10 +50,10 @@ extension HomeView {
         }
         .onReceive(LocationManager.shared.$userLocation) { location in
             if let location = location {
-                locationViewModel.userLocation = location
+                homeViewModel.userLocation = location
             }
         }
-        .onReceive(locationViewModel.$selectedUberLocation) { location in
+        .onReceive(homeViewModel.$selectedUberLocation) { location in
             if let _ = location {
                 withAnimation {
                     self.mapState = .locationSelected

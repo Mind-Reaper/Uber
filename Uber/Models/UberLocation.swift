@@ -9,8 +9,19 @@ import CoreLocation
 
 
 
-struct UberLocation {
+struct UberLocation: Codable {
     let title: String
-    let subtitle: String
-    let coordinate: CLLocationCoordinate2D
+    let address: String
+    let coordinate: UserCoordinates
+    
+    
+    
+    func toCLLocationCoordinate2D() -> CLLocationCoordinate2D {
+        
+        return CLLocationCoordinate2D(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+            )
+    }
+    
 }

@@ -12,8 +12,9 @@ import MapKit
 struct MapViewRepresentable: UIViewRepresentable {
     let mapView = MKMapView()
     @Binding var mapState: MapViewState
-    @EnvironmentObject var locationViewModel: LocationSearchViewModel
+//    @EnvironmentObject var locationViewModel: HomeViewModel
     @EnvironmentObject var homeViewModel: HomeViewModel
+    
     
     
     func makeUIView(context: Context) -> some UIView {
@@ -36,23 +37,18 @@ struct MapViewRepresentable: UIViewRepresentable {
             context.coordinator.clearMapView()
             break
         case .locationSelected:
-            if let coordinate = locationViewModel.selectedUberLocation?.coordinate {
-                context.coordinator.addAndSelectAnnonation(withCoordinate: coordinate)
-                context.coordinator.configurePolyline(withDestinationCoordinate: coordinate)
+            if let coordinate = homeViewModel.selectedUberLocation?.coordinate {
+                context.coordinator.addAndSelectAnnonation(withCoordinate: coordinate.toCLLocationCoordinate2D())
+                context.coordinator.configurePolyline(withDestinationCoordinate: coordinate.toCLLocationCoordinate2D())
             }
             break
         }
-        
-       
-        
+          
     }
     
     func makeCoordinator() -> MapCoordinator {
         return MapCoordinator(parent: self)
     }
-    
-    
-    
 }
 
 
@@ -131,7 +127,7 @@ extension MapViewRepresentable {
             guard let userLocationCoordinate = self.userLocationCoordinate else {
                 return
             }
-            parent.locationViewModel.getDestinationRoute(from: userLocationCoordinate, to: coordinate) { route in
+            parent.homeViewModel.getDestinationRoute(from: userLocationCoordinate, to: coordinate) { route in
                 self.parent.mapView.addOverlay(route.polyline)
                 
                 let rect = self.parent.mapView.mapRectThatFits(route.polyline.boundingMapRect,

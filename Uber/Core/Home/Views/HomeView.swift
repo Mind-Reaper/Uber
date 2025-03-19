@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     
-    @EnvironmentObject var locationViewModel: LocationSearchViewModel
+//    @EnvironmentObject var locationViewModel: LocationSearchViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
     
     @State internal var mapState = MapViewState.noInput
@@ -76,5 +76,6 @@ struct HomeView: View {
 #Preview {
     HomeView()
         .environmentObject(AuthViewModel())
-        .environmentObject(LocationSearchViewModel())
+        .environmentObject(HomeViewModel())
+//        .environmentObject(LocationSearchViewModel())
 }

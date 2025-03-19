@@ -17,4 +17,8 @@ struct UserCoordinates: Codable {
         return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
     
+    static func from(coordinate: CLLocationCoordinate2D) -> UserCoordinates {
+        return UserCoordinates(latitude: coordinate.latitude, longitude: coordinate.longitude)
+    }
+    
 }

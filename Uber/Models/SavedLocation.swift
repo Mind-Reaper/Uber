@@ -16,7 +16,7 @@ struct SavedLocation: Codable {
     static func fromUberLocation(_ location: UberLocation) -> SavedLocation {
         return SavedLocation(
             title: location.title,
-            address: location.subtitle,
+            address: location.address,
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude
         )
@@ -25,8 +25,8 @@ struct SavedLocation: Codable {
     func toUberLocation() -> UberLocation {
         return UberLocation(
             title:title,
-            subtitle: address,
-            coordinate: CLLocationCoordinate2D(
+            address: address,
+            coordinate: UserCoordinates(
                 latitude: latitude,
                 longitude: longitude
             )

@@ -9,17 +9,22 @@ import SwiftUI
 
 struct LocationSearchResultView: View {
     
-    @StateObject var viewModel: LocationSearchViewModel
+    @StateObject var homeViewModel: HomeViewModel
     let config: LocationResultViewConfig
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
-                ForEach(viewModel.results, id: \.self) { result in
+                ForEach(homeViewModel.results, id: \.self) { result in
                     LocationSearchResultCell(
                         title: result.title, subtitle: result.subtitle
                     ).onTapGesture {
-                        viewModel.selectLocation(result, config: config)
+                        homeViewModel.selectLocation(result, config: config)
+                        
+                        if case .savedLocation(_) = config  {
+                            dismiss()
+                        }
                     }
                     .padding(.horizontal, 20)
                     
@@ -31,6 +36,6 @@ struct LocationSearchResultView: View {
 
 #Preview {
     LocationSearchResultView(
-        viewModel: LocationSearchViewModel(), config: .ride)
+        homeViewModel: HomeViewModel(), config: .ride)
     
 }

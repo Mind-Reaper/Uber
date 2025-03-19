@@ -8,13 +8,13 @@
 import Foundation
 
 
-enum RideType: Int, CaseIterable, Identifiable {
+enum RideType: String, CaseIterable, Identifiable, Codable {
     case uberX
     case black
     case uberXL
     
     
-    var id: Int {
+    var id: String {
         return rawValue
     }
     

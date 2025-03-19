@@ -11,7 +11,7 @@ import SwiftUI
 
 @main
 struct UberApp: App {
-    @StateObject var locationViewModel: LocationSearchViewModel = .init()
+//    @StateObject var locationViewModel: LocationSearchViewModel = .init()
     @StateObject var authViewModel = AuthViewModel()
     @StateObject var homeViewModel: HomeViewModel = .init()
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
@@ -19,7 +19,7 @@ struct UberApp: App {
         WindowGroup {
             HomeView()
                 .background(Color.theme.backgroundColor.ignoresSafeArea())
-                .environmentObject(locationViewModel)
+//                .environmentObject(locationViewModel)
                 .environmentObject(authViewModel)
                 .environmentObject(homeViewModel)
         }

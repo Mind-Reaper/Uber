@@ -15,14 +15,14 @@ struct SavedLocationSearchView: View {
     let user: AppUser
     
     
-    @StateObject private var viewModel = LocationSearchViewModel()
+    @StateObject private var homeViewModel = HomeViewModel()
     
    
     
     var body: some View {
         VStack {
             
-            TextField("Search for a location..", text: $viewModel.queryFragment)
+            TextField("Search for a location..", text: $homeViewModel.queryFragment)
                 .frame(height: 32)
                 .padding(.horizontal)
                 .cornerRadius(10)
@@ -35,11 +35,11 @@ struct SavedLocationSearchView: View {
             
             Spacer()
             
-            LocationSearchResultView(viewModel: viewModel, config: .savedLocation(savedLocationViewModel))
+            LocationSearchResultView(homeViewModel: homeViewModel, config: .savedLocation(savedLocationViewModel))
             
         }
         .onAppear {
-            self.viewModel.queryFragment = (savedLocationViewModel == .home ? user.home?.title : user.work?.title) ?? ""
+            self.homeViewModel.queryFragment = (savedLocationViewModel == .home ? user.home?.title : user.work?.title) ?? ""
         }
         .navigationTitle(savedLocationViewModel.title)
             .navigationBarTitleDisplayMode(.large)

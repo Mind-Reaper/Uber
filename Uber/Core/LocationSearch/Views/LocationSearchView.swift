@@ -10,7 +10,7 @@ import SwiftUI
 struct LocationSearchView: View {
     
     @State private var pickupLocationText: String = ""
-    @EnvironmentObject var viewModel: LocationSearchViewModel
+    @EnvironmentObject var homeViewModel: HomeViewModel
     
     var body: some View {
         VStack {
@@ -36,7 +36,7 @@ struct LocationSearchView: View {
                         
                         
                     Divider()
-                    TextField("Where to?", text: $viewModel.queryFragment)
+                    TextField("Where to?", text: $homeViewModel.queryFragment)
                 }
             }
             
@@ -50,7 +50,7 @@ struct LocationSearchView: View {
             
             // list view
             
-            LocationSearchResultView(viewModel: viewModel, config: .ride)
+            LocationSearchResultView(homeViewModel: homeViewModel, config: .ride)
             
             
         }
@@ -59,6 +59,6 @@ struct LocationSearchView: View {
 
 #Preview {
     LocationSearchView()
-        .environmentObject(LocationSearchViewModel())
+        .environmentObject(HomeViewModel())
 }
 
