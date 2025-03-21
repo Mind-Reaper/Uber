@@ -14,6 +14,7 @@ class HomeViewModel: NSObject, ObservableObject {
     
     
     @Published var drivers: [AppUser] = []
+    @Published var trip : Trip?
     private let userService = SupabaseUserService.shared
     private var cancellables = Set<AnyCancellable>()
     private var currentUser: AppUser?
@@ -43,19 +44,13 @@ class HomeViewModel: NSObject, ObservableObject {
     }
     
     
-    func fetchDrivers() {
-        userService.fetchDrivers { drivers in
-            if let drivers = drivers {
-                self.drivers = drivers
-            }
-        }
-    }
+   
     
     func fetchAppUser() {
         
         userService.$user.sink { user in
             self.currentUser = user
-            guard user?.accountType == .rider else { return }
+            self.fetchTrips()
             self.fetchDrivers()
         }
         .store(in: &cancellables)
@@ -66,39 +61,40 @@ class HomeViewModel: NSObject, ObservableObject {
 // MARK: - Rider API
 
 extension HomeViewModel {
-    func requestTrip() {
+    func requestTrip(rideType: RideType) {
         guard let driver = drivers.first else { return }
         guard let currentUser = currentUser else { return }
         guard let dropoffLocation = selectedUberLocation else { return }
-        
-        
         let userLocation = CLLocation(latitude: currentUser.coordinates.latitude, longitude: currentUser.coordinates.longitude)
-        
         getUberLocationFromCLLocation(userLocation) { riderLocation in
             guard let riderLocation = riderLocation else { return }
-        }
-        
-        let trip = Trip(
-            id: NSUUID().uuidString,
-            riderUid: currentUser.uid,
-            driverUid: driver.uid,
-            riderName: currentUser.firstname,
-            driverName: currentUser.firstname,
-            riderLocation: UberLocation(
-                title: "Apple Campus",
-                address: "123 Main Str",
-                coordinate: currentUser.coordinates
-            ),
-            driverLocation: dropoffLocation,
-            tripCost: 50.0,
-            rideType: .black
-        )
-        
-        
-        SupabaseTripService.shared.createTrip(trip: trip) { result in
             
+            let tripCost = self.computeRidePrice(forType: rideType)
+            let trip = Trip(
+                id: NSUUID().uuidString,
+                riderUid: currentUser.uid,
+                driverUid: driver.uid,
+                riderName: currentUser.firstname,
+                driverName: currentUser.firstname,
+                pickupLocation: riderLocation,
+                dropoffLocation: dropoffLocation,
+                tripCost: tripCost,
+                rideType: rideType
+            )
+            
+            SupabaseTripService.shared.createTrip(trip: trip) { result in
+                
+            }
         }
-        
+    }
+    
+    func fetchDrivers() {
+        guard self.currentUser?.accountType == .rider else { return }
+        userService.fetchDrivers { drivers in
+            if let drivers = drivers {
+                self.drivers = drivers
+            }
+        }
     }
 }
 
@@ -106,7 +102,26 @@ extension HomeViewModel {
 // MARK: - DriverAPI
 
 extension HomeViewModel {
-    
+    func fetchTrips() {
+        guard let currentUser = currentUser, currentUser.accountType == .driver else { return }
+       SupabaseTripService.shared.fetchTrips(forDriver: currentUser.uid) { trips in
+           if let trip = trips.first {
+               self.trip = trip
+               
+               self.getDestinationRoute(from: currentUser.coordinates.toCLLocationCoordinate2D(), to: trip.pickupLocation.toCLLocationCoordinate2D()) { route in
+                   self.trip?.travelTimeToPickup = Int(route.expectedTravelTime / 60)
+                   self.trip?.distanceToPickup = route.distance
+               }
+               
+               self.getDestinationRoute(from: trip.pickupLocation.toCLLocationCoordinate2D(), to: trip.dropoffLocation.toCLLocationCoordinate2D()) { route in
+                   self.trip?.travelTimeToDropoff = Int(route.expectedTravelTime / 60)
+                   self.trip?.distanceToDropoff = route.distance
+               }
+               
+               
+           }
+        }
+    }
 }
 
 
@@ -136,11 +151,14 @@ extension HomeViewModel {
             }
             
             let uberLocation = UberLocation(
-                title: placemark.name!, address: placemark.description, coordinate: UserCoordinates.from(coordinate: location.coordinate)
+                title: placemark.name!, address: placemark.formattedAddress, coordinate: UserCoordinates.from(coordinate: location.coordinate)
             )
+            
+            completion(uberLocation)
         }
     }
     
+  
     
     func selectLocation(_ localSearch: MKLocalSearchCompletion, config: LocationResultViewConfig) {
         locationSearch(forLocalSearchCompletion: localSearch) { response, error in

@@ -32,7 +32,7 @@ extension HomeView {
                 .padding(.bottom)
                 if mapState == .searchingForLocation {
                     LocationSearchView()
-                }  else if mapState == .noInput  {
+                }  else if mapState == .noInput && homeViewModel.trip == nil  {
                     LocationSearchActivationView()
                         .padding(.horizontal, 20)
                         .onTapGesture {
@@ -44,8 +44,17 @@ extension HomeView {
                     RideRequestView()
                         .transition(.move(edge: .bottom))
                 }
+                
+                
+                    
+                        
+                
             }
             .background(mapState == .searchingForLocation ? Color.theme.backgroundColor : .clear)
+            
+            AcceptTripView(
+                trip: $homeViewModel.trip
+            )
             
         }
         .onReceive(LocationManager.shared.$userLocation) { location in

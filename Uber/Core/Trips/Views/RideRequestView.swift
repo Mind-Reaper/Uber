@@ -143,7 +143,7 @@ struct RideRequestView: View {
                     }
                     
                     Button {
-                        homeViewModel.requestTrip()
+                        homeViewModel.requestTrip(rideType: selectedRideType)
                     } label: {
                         Text("Choose \(selectedRideType.description)")
                             .foregroundColor(Color.theme.buttonForegroundColor)

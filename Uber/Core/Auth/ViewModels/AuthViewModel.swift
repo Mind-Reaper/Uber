@@ -20,7 +20,7 @@ enum AuthViewType {
 class AuthViewModel: ObservableObject {
     @Published var userSession: User?
     @Published var currentUser: AppUser?
-
+    
     private let userService = SupabaseUserService.shared
     private var cancellables: Set<AnyCancellable> = []
     
@@ -108,7 +108,7 @@ class AuthViewModel: ObservableObject {
                     Router.shared.reset()
                     self.userSession = nil
                     self.currentUser = nil
-                  
+                    
                 }
                 
             } catch {
@@ -119,14 +119,18 @@ class AuthViewModel: ObservableObject {
     
     
     func fetchAppUser() {
-        userService.$user.sink { user in
-            self.currentUser = user
-        }
-        .store(in: &cancellables)
+        userService.$user
+            .receive(on: DispatchQueue.main)
+            .sink { user in
+                self.currentUser = user
+                self.updateUserCoordinates()
+            }
+            .store(in: &cancellables)
     }
     
     
     func updateUserCoordinates() {
+        guard self.userSession != nil else { return }
         guard let location = LocationManager.shared.userLocation else { return }
         
         debugPrint("User location: \(location)")
