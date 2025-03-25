@@ -42,6 +42,11 @@ struct MapViewRepresentable: UIViewRepresentable {
                 context.coordinator.configurePolyline(withDestinationCoordinate: coordinate.toCLLocationCoordinate2D())
             }
             break
+        case .tripAccepted:
+            break
+            
+        case .tripRequested:
+            break
         }
           
     }

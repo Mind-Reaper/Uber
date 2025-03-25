@@ -8,6 +8,13 @@
 import Foundation
 
 
+enum TripState: String, Codable {
+    case requested
+    case rejected
+    case accepted
+}
+
+
 struct Trip: Identifiable, Codable {
     let id: String
     let riderUid: String
@@ -18,6 +25,7 @@ struct Trip: Identifiable, Codable {
     let dropoffLocation: UberLocation
     let tripCost: Double
     let rideType: RideType
+    let state: TripState
     
     var distanceToPickup: Double?
     var distanceToDropoff: Double?
@@ -35,6 +43,7 @@ struct Trip: Identifiable, Codable {
         case dropoffLocation = "dropoff_location"
         case tripCost = "trip_cost"
         case rideType = "ride_type"
+        case state
     }
     
     
@@ -57,8 +66,16 @@ struct Trip: Identifiable, Codable {
                 )
             ),
             tripCost: 53.0,
-            rideType: .uberX
+            rideType: .uberX,
+            state: .requested
         )
     }
     
+}
+
+
+
+
+struct UpdateTrip: Encodable {
+    var state: TripState?
 }

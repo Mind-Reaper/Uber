@@ -78,7 +78,8 @@ struct RideRequestView: View {
                                         )
                                 }
                                 HStack  {
-                                    if !selected {    Image(type.image)
+                                    if !selected {
+                                        Image(type.image)
                                             .resizable()
                                             .scaledToFit()
                                             .frame(
@@ -168,4 +169,5 @@ struct RideRequestView: View {
 
 #Preview {
     RideRequestView()
+        .environmentObject(HomeViewModel())
 }

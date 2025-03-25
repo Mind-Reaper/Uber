@@ -12,7 +12,7 @@ extension HomeView {
         ZStack (alignment: .top) {
             MapViewRepresentable(mapState: $mapState)
                 .ignoresSafeArea()
-
+            
             VStack(alignment: .leading) {
                 HStack {
                     MapViewActionButton(
@@ -40,22 +40,39 @@ extension HomeView {
                                 mapState = .searchingForLocation
                             }
                         }
-                } else if mapState == .locationSelected {
+                }
+                
+              
+            }
+            .background(mapState == .searchingForLocation ? Color.theme.backgroundColor : .clear)
+            
+            if let user = authViewModel.currentUser, user.accountType == .rider, homeViewModel.trip != nil {
+                if mapState == .locationSelected {
                     RideRequestView()
                         .transition(.move(edge: .bottom))
                 }
                 
-                
-                    
+                TripRequestedView(
+                    isPresented: Binding<Bool>(get: {mapState == .tripRequested}, set: { _, __ in
                         
+                    }),
+                    trip: homeViewModel.trip!
+                )
+                
+                TripAcceptedView(
+                    isPresented: Binding<Bool>(get: {mapState == .tripAccepted}, set: { _ in
+                        
+                    }),
+                    trip: homeViewModel.trip!
+                )
+            }
+            
+            if authViewModel.currentUser?.accountType == .driver {
+                AcceptTripView(
+                    trip: $homeViewModel.trip
+                )
                 
             }
-            .background(mapState == .searchingForLocation ? Color.theme.backgroundColor : .clear)
-            
-            AcceptTripView(
-                trip: $homeViewModel.trip
-            )
-            
         }
         .onReceive(LocationManager.shared.$userLocation) { location in
             if let location = location {
@@ -66,6 +83,20 @@ extension HomeView {
             if let _ = location {
                 withAnimation {
                     self.mapState = .locationSelected
+                }
+            }
+        }
+        .onReceive(homeViewModel.$trip) { trip in
+            guard let trip = trip else { return }
+            debugPrint("Trip State: \(trip.state)")
+            withAnimation {
+                switch trip.state {
+                case .requested:
+                    self.mapState = .tripRequested
+                case .rejected:
+                    self.mapState = .noInput
+                case .accepted:
+                    self.mapState = .tripAccepted
                 }
             }
         }

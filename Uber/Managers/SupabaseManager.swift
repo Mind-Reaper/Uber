@@ -10,7 +10,7 @@ import Supabase
 
 
 class SupabaseManager {
-   
+    
     
     
     static private let supabase = SupabaseClient(
@@ -25,6 +25,16 @@ class SupabaseManager {
     
     static func table(_ table: String) -> PostgrestQueryBuilder {
         return supabase.from(table);
+    }
+    
+    static func channel(_ channel: String) -> RealtimeChannelV2 {
+        return supabase.channel(channel)
+    }
+    
+    static func channel(_ channel: String,
+                        options: @Sendable (inout RealtimeChannelConfig) -> Void = { _ in }
+    ) -> RealtimeChannelV2 {
+        return supabase.channel(channel, options: options)
     }
     
     

@@ -13,6 +13,8 @@ enum MapViewState {
     case noInput
     case searchingForLocation
     case locationSelected
+    case tripRequested
+    case tripAccepted
     
     
     var notMainView: Bool {

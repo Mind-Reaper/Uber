@@ -37,6 +37,7 @@ struct CustomButton: View {
                         .foregroundColor(.buttonForeground)
                 }
             }
+            .padding()
             .frame(maxWidth: .infinity, maxHeight: 50)
             .background(.buttonBackground)
             .cornerRadius(10)

@@ -65,7 +65,7 @@ struct AcceptTripView: View {
                             }
                             .onTapGesture {
                                 withAnimation {
-                                    homeViewModel.trip = nil
+                                    homeViewModel.rejectTrip()
                                 }
                                 
                             }
@@ -94,7 +94,7 @@ struct AcceptTripView: View {
                     
                     Rectangle()
                         .fill(Color(.systemGray5))
-                        .frame(height: 1)
+                        .frame(height: 2)
                     
                     // ride info
                     
@@ -105,7 +105,7 @@ struct AcceptTripView: View {
                                 .frame(width: 8, height: 8)
                             Rectangle()
                                 .fill(Color(.systemGray))
-                                .frame(width: 1, height: 32)
+                                .frame(width: 1, height: 40)
                             Rectangle()
                                 .fill(Color.theme.foregroundColor)
                                 .frame(width: 8, height: 8)
@@ -143,9 +143,7 @@ struct AcceptTripView: View {
                     // action button
                     
                     Button {
-                        
-                        
-                        
+                        homeViewModel.acceptTrip()
                     } label: {
                         Text("Accept")
                             .foregroundColor(Color.theme.buttonForegroundColor)

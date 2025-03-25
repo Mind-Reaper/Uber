@@ -52,6 +52,7 @@ class HomeViewModel: NSObject, ObservableObject {
             self.currentUser = user
             self.fetchTrips()
             self.fetchDrivers()
+            self.addTripObserverForRider()
         }
         .store(in: &cancellables)
     }
@@ -61,6 +62,23 @@ class HomeViewModel: NSObject, ObservableObject {
 // MARK: - Rider API
 
 extension HomeViewModel {
+    
+    
+    func addTripObserverForRider() {
+        guard let currentUser = currentUser, currentUser.accountType == .rider else { return }
+        SupabaseTripService.shared.addTripObserver(forRider: currentUser.uid)
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                if case .failure (let error) = completion {
+                    debugPrint("Error in observe rider trip: \(error)")
+                }
+            } receiveValue: { trip in
+                self.trip = trip
+            }
+            .store(in: &cancellables)
+
+    }
+    
     func requestTrip(rideType: RideType) {
         guard let driver = drivers.first else { return }
         guard let currentUser = currentUser else { return }
@@ -79,7 +97,8 @@ extension HomeViewModel {
                 pickupLocation: riderLocation,
                 dropoffLocation: dropoffLocation,
                 tripCost: tripCost,
-                rideType: rideType
+                rideType: rideType,
+                state: .requested
             )
             
             SupabaseTripService.shared.createTrip(trip: trip) { result in
@@ -117,9 +136,27 @@ extension HomeViewModel {
                    self.trip?.travelTimeToDropoff = Int(route.expectedTravelTime / 60)
                    self.trip?.distanceToDropoff = route.distance
                }
-               
-               
            }
+        }
+    }
+    
+    
+    func rejectTrip() {
+        guard let trip = self.trip else { return }
+        SupabaseTripService.shared.updateTripState(id: trip.id, state: .rejected) { success in
+            if success {
+                self.trip = nil
+            }
+        }
+    }
+    
+    
+    func acceptTrip() {
+        guard let trip = self.trip else { return }
+        SupabaseTripService.shared.updateTripState(id: trip.id, state: .accepted) { success in
+            if success {
+                
+            }
         }
     }
 }
