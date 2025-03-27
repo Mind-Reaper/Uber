@@ -59,6 +59,8 @@ struct LocationSearchView: View {
 
 #Preview {
     LocationSearchView()
-        .environmentObject(HomeViewModel())
+        .environmentObject(HomeViewModel(
+            userService: SupabaseUserService(), tripService: SupabaseTripService()
+        ))
 }
 

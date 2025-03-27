@@ -6,12 +6,15 @@
 //
 
 import Foundation
+import Combine
 
 class  SupabaseUserService: UserService {
     
-    static let shared = SupabaseUserService()
     
     @Published var user: AppUser?
+    var userPublisher: AnyPublisher<AppUser?, Never> {
+            $user.eraseToAnyPublisher()
+        }
     
     init() {
         fetchUser()

@@ -13,9 +13,13 @@ import MapKit
 class HomeViewModel: NSObject, ObservableObject {
     
     
+    let tripService: TripService
+    let userService:  UserService
+    
+    
     @Published var drivers: [AppUser] = []
     @Published var trip : Trip?
-    private let userService = SupabaseUserService.shared
+   
     private var cancellables = Set<AnyCancellable>()
     private var currentUser: AppUser?
     
@@ -35,10 +39,11 @@ class HomeViewModel: NSObject, ObservableObject {
     
     // MARK: - Lifecycle
     
-    override init () {
+    init (userService: UserService, tripService: TripService) {
+        self.userService = userService
+        self.tripService = tripService
         super.init()
         fetchAppUser()
-        
         searchCompleter.delegate = self
         searchCompleter.queryFragment = queryFragment
     }
@@ -47,15 +52,23 @@ class HomeViewModel: NSObject, ObservableObject {
    
     
     func fetchAppUser() {
-        
-        userService.$user.sink { user in
+        userService.userPublisher.sink { user in
             self.currentUser = user
-            self.fetchTrips()
             self.fetchDrivers()
+            self.addTripObserverForDriver()
             self.addTripObserverForRider()
         }
         .store(in: &cancellables)
     }
+    
+    func cancelTrip() {
+        guard let trip = self.trip else { return }
+        let updateTrip = UpdateTrip(state: .cancelled)
+        tripService.updateTrip(id: trip.id, update: updateTrip) { _ in
+            
+        }
+    }
+    
 }
 
 
@@ -66,7 +79,7 @@ extension HomeViewModel {
     
     func addTripObserverForRider() {
         guard let currentUser = currentUser, currentUser.accountType == .rider else { return }
-        SupabaseTripService.shared.addTripObserver(forRider: currentUser.uid)
+        tripService.addTripObserver(forRider: currentUser.uid)
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 if case .failure (let error) = completion {
@@ -101,7 +114,7 @@ extension HomeViewModel {
                 state: .requested
             )
             
-            SupabaseTripService.shared.createTrip(trip: trip) { result in
+            self.tripService.createTrip(trip: trip) { result in
                 
             }
         }
@@ -121,29 +134,47 @@ extension HomeViewModel {
 // MARK: - DriverAPI
 
 extension HomeViewModel {
-    func fetchTrips() {
+    
+    func addTripObserverForDriver() {
         guard let currentUser = currentUser, currentUser.accountType == .driver else { return }
-       SupabaseTripService.shared.fetchTrips(forDriver: currentUser.uid) { trips in
-           if let trip = trips.first {
-               self.trip = trip
-               
-               self.getDestinationRoute(from: currentUser.coordinates.toCLLocationCoordinate2D(), to: trip.pickupLocation.toCLLocationCoordinate2D()) { route in
-                   self.trip?.travelTimeToPickup = Int(route.expectedTravelTime / 60)
-                   self.trip?.distanceToPickup = route.distance
-               }
-               
-               self.getDestinationRoute(from: trip.pickupLocation.toCLLocationCoordinate2D(), to: trip.dropoffLocation.toCLLocationCoordinate2D()) { route in
-                   self.trip?.travelTimeToDropoff = Int(route.expectedTravelTime / 60)
-                   self.trip?.distanceToDropoff = route.distance
-               }
-           }
-        }
+        tripService.addTripObserver(forDriver: currentUser.uid)
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                if case .failure (let error) = completion {
+                    debugPrint("Error in observe driver trip: \(error)")
+                }
+            } receiveValue: { trip in
+                self.trip = trip
+                self.getDestinationRoute(from: currentUser.coordinates.toCLLocationCoordinate2D(), to: trip.pickupLocation.toCLLocationCoordinate2D()) { route in
+                    self.trip?.travelTimeToPickup = Int(route.expectedTravelTime / 60)
+                    self.trip?.distanceToPickup = route.distance
+                }
+                
+                self.getDestinationRoute(from: trip.pickupLocation.toCLLocationCoordinate2D(), to: trip.dropoffLocation.toCLLocationCoordinate2D()) { route in
+                    self.trip?.travelTimeToDropoff = Int(route.expectedTravelTime / 60)
+                    self.trip?.distanceToDropoff = route.distance
+                }
+            }
+            .store(in: &cancellables)
+
     }
+    
+//    func fetchTrips() {
+//        guard let currentUser = currentUser, currentUser.accountType == .driver else { return }
+//       SupabaseTripService.shared.fetchTrips(forDriver: currentUser.uid) { trips in
+//           if let trip = trips.first {
+//               self.trip = trip
+//               
+//               
+//           }
+//        }
+//    }
     
     
     func rejectTrip() {
         guard let trip = self.trip else { return }
-        SupabaseTripService.shared.updateTripState(id: trip.id, state: .rejected) { success in
+        let updateTrip = UpdateTrip(state: .rejected)
+        tripService.updateTrip(id: trip.id, update: updateTrip) { success in
             if success {
                 self.trip = nil
             }
@@ -153,7 +184,10 @@ extension HomeViewModel {
     
     func acceptTrip() {
         guard let trip = self.trip else { return }
-        SupabaseTripService.shared.updateTripState(id: trip.id, state: .accepted) { success in
+        let updateTrip = UpdateTrip(state: .accepted,
+                                    travelDetails: trip.travelDetails
+        )
+        tripService.updateTrip(id: trip.id, update: updateTrip) { success in
             if success {
                 
             }

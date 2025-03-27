@@ -169,5 +169,7 @@ struct RideRequestView: View {
 
 #Preview {
     RideRequestView()
-        .environmentObject(HomeViewModel())
+        .environmentObject(HomeViewModel(
+            userService: SupabaseUserService(), tripService: SupabaseTripService()
+        ))
 }

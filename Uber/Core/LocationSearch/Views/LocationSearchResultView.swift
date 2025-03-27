@@ -36,6 +36,8 @@ struct LocationSearchResultView: View {
 
 #Preview {
     LocationSearchResultView(
-        homeViewModel: HomeViewModel(), config: .ride)
+        homeViewModel: HomeViewModel(
+            userService: SupabaseUserService(), tripService: SupabaseTripService()
+        ), config: .ride)
     
 }

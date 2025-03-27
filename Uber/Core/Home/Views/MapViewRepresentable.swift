@@ -47,6 +47,8 @@ struct MapViewRepresentable: UIViewRepresentable {
             
         case .tripRequested:
             break
+        case .tripCancelled:
+            break
         }
           
     }

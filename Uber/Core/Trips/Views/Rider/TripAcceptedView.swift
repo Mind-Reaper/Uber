@@ -11,11 +11,12 @@ struct TripAcceptedView: View {
     
     @Binding var isPresented: Bool
     let trip: Trip
+    @EnvironmentObject var homeViewModel: HomeViewModel
     
     var body: some View {
         BottomSheet(isPresented: $isPresented,
-                    minHeight: UIScreen.main.bounds.height * 0.45,
-                    maxHeight:UIScreen.main.bounds.height * 0.45
+                    minHeight: UIScreen.main.bounds.height * 0.5,
+                    maxHeight:UIScreen.main.bounds.height * 0.5
         ) {
             VStack {
                 HStack {
@@ -24,7 +25,7 @@ struct TripAcceptedView: View {
                         .fontWeight(.semibold)
                     Spacer()
                     VStack {
-                        Text("2")
+                        Text(trip.travelTimeToPickup == nil ? "-" :  "\(trip.travelTimeToPickup!)")
                             .font(.title2)
                             .fontWeight(.semibold)
                         Text("min")
@@ -83,7 +84,7 @@ struct TripAcceptedView: View {
                     .padding(.bottom)
                 
                 CustomButton(title: "CANCEL RIDE") {
-                    
+                    homeViewModel.cancelTrip()
                 }
                 .padding(.horizontal)
             }
@@ -93,4 +94,5 @@ struct TripAcceptedView: View {
 
 #Preview {
     TripAcceptedView(isPresented: .constant(true), trip: Trip.empty())
+        .environmentObject(HomeViewModel(userService: SupabaseUserService(), tripService: SupabaseTripService()))
 }

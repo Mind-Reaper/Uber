@@ -18,17 +18,18 @@ enum AuthViewType {
 
 
 class AuthViewModel: ObservableObject {
+    
+    let userService: UserService
+    
     @Published var userSession: User?
     @Published var currentUser: AppUser?
     
-    private let userService = SupabaseUserService.shared
     private var cancellables: Set<AnyCancellable> = []
-    
-    
     static let usersTable: String = "users"
     
     
-    init() {
+    init(userService: UserService) {
+        self.userService = userService
         userSession = SupabaseManager.auth.currentUser
         fetchAppUser()
         debugPrint("User Session: \(String(describing: userSession))")
@@ -119,7 +120,7 @@ class AuthViewModel: ObservableObject {
     
     
     func fetchAppUser() {
-        userService.$user
+        userService.userPublisher
             .receive(on: DispatchQueue.main)
             .sink { user in
                 self.currentUser = user

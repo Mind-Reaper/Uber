@@ -14,6 +14,8 @@ struct CustomButton: View {
   
     var title: String?
     var systemIcon: String?
+    var buttonColor: Color?
+    var textColor: Color?
     let action: () -> Void
     
     
@@ -27,19 +29,19 @@ struct CustomButton: View {
                 if (title != nil)  {
                     Text(title!)
                         .fontWeight(.bold)
-                        .foregroundColor(.buttonForeground)
+                        .foregroundColor(textColor ?? .buttonForeground)
                 }
                 
                 if (systemIcon != nil) {
                     
                     Image(systemName: systemIcon!)
                         .fontWeight(.bold)
-                        .foregroundColor(.buttonForeground)
+                        .foregroundColor(textColor ?? .buttonForeground)
                 }
             }
             .padding()
             .frame(maxWidth: .infinity, maxHeight: 50)
-            .background(.buttonBackground)
+            .background(buttonColor ?? .buttonBackground)
             .cornerRadius(10)
         }
        

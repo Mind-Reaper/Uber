@@ -32,7 +32,7 @@ extension HomeView {
                 .padding(.bottom)
                 if mapState == .searchingForLocation {
                     LocationSearchView()
-                }  else if mapState == .noInput && homeViewModel.trip == nil  {
+                }  else if mapState == .noInput && authViewModel.currentUser?.accountType == .rider  {
                     LocationSearchActivationView()
                         .padding(.horizontal, 20)
                         .onTapGesture {
@@ -50,27 +50,46 @@ extension HomeView {
                 if mapState == .locationSelected {
                     RideRequestView()
                         .transition(.move(edge: .bottom))
+                } else if homeViewModel.trip != nil {
+                    TripRequestedView(
+                        isPresented: Binding<Bool>(get: {mapState == .tripRequested}, set: { _, __ in
+                            
+                        }),
+                        trip: homeViewModel.trip!
+                    )
+                    
+                    TripAcceptedView(
+                        isPresented: Binding<Bool>(get: {mapState == .tripAccepted}, set: { _ in
+                            
+                        }),
+                        trip: homeViewModel.trip!
+                    )
+                    
+                    
+                    TripCancelledView(isPresented: Binding<Bool>(get: {mapState == .tripCancelled}, set: { _ in
+                        
+                    }))
                 }
-                
-                TripRequestedView(
-                    isPresented: Binding<Bool>(get: {mapState == .tripRequested}, set: { _, __ in
-                        
-                    }),
-                    trip: homeViewModel.trip!
-                )
-                
-                TripAcceptedView(
-                    isPresented: Binding<Bool>(get: {mapState == .tripAccepted}, set: { _ in
-                        
-                    }),
-                    trip: homeViewModel.trip!
-                )
             }
             
-            if authViewModel.currentUser?.accountType == .driver {
+            if authViewModel.currentUser?.accountType == .driver, homeViewModel.trip != nil {
                 AcceptTripView(
-                    trip: $homeViewModel.trip
+                    isPresented:  Binding<Bool>(get: {mapState == .tripRequested}, set: { _, __ in
+                        
+                    }),
+                    trip: homeViewModel.trip!
                 )
+                
+                PickupView(
+                    isPresented:  Binding<Bool>(get: {mapState == .tripAccepted}, set: { _, __ in
+                        
+                    }),
+                    trip: homeViewModel.trip!
+                )
+                
+                TripCancelledView(isPresented: Binding<Bool>(get: {mapState == .tripCancelled}, set: { _ in
+                    
+                }))
                 
             }
         }
@@ -87,9 +106,12 @@ extension HomeView {
             }
         }
         .onReceive(homeViewModel.$trip) { trip in
-            guard let trip = trip else { return }
-            debugPrint("Trip State: \(trip.state)")
             withAnimation {
+                guard let trip = trip else {
+                    self.mapState = .noInput
+                    return
+                }
+            debugPrint("Trip State: \(trip.state)")
                 switch trip.state {
                 case .requested:
                     self.mapState = .tripRequested
@@ -97,6 +119,8 @@ extension HomeView {
                     self.mapState = .noInput
                 case .accepted:
                     self.mapState = .tripAccepted
+                case .cancelled:
+                    self.mapState = .tripCancelled
                 }
             }
         }

@@ -75,7 +75,9 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
-        .environmentObject(AuthViewModel())
-        .environmentObject(HomeViewModel())
+        .environmentObject(AuthViewModel(userService: SupabaseUserService()))
+        .environmentObject(HomeViewModel(
+            userService: SupabaseUserService(), tripService: SupabaseTripService()
+        ))
 //        .environmentObject(LocationSearchViewModel())
 }

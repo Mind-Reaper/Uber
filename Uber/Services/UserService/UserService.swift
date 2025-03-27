@@ -6,12 +6,15 @@
 //
 
 import Foundation
+import Combine
 
 
 protocol UserService {
     
-    func fetchUser()
+    var user: AppUser? { get }
+    var userPublisher: AnyPublisher<AppUser?, Never> { get }
     
+    func fetchUser()
     func fetchDrivers(completion: @escaping ([AppUser]?) -> Void)
     
 }

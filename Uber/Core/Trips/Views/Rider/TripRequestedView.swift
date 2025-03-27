@@ -13,8 +13,8 @@ struct TripRequestedView: View {
     
     var body: some View {
         BottomSheet(isPresented: $isPresented,
-                    minHeight: UIScreen.main.bounds.height * 0.45,
-                    maxHeight: UIScreen.main.bounds.height * 0.45
+                    minHeight: UIScreen.main.bounds.height * 0.5,
+                    maxHeight: UIScreen.main.bounds.height * 0.5
         ) {
             VStack {
                 Text("Ride Requested")
@@ -26,10 +26,11 @@ struct TripRequestedView: View {
                     .fontWeight(.medium)
                     .foregroundStyle(.gray)
                 
-                ProgressView()
-                               .progressViewStyle(LinearProgressViewStyle())
-                               .tint(.foreground)
-                               .padding(.bottom)
+                AnimatedLinearProgressView()
+                    .frame(height: 5)
+                    .padding(.bottom)
+                
+
                
                 HStack {
                     

@@ -15,7 +15,7 @@ struct SavedLocationSearchView: View {
     let user: AppUser
     
     
-    @StateObject private var homeViewModel = HomeViewModel()
+    @EnvironmentObject private var homeViewModel: HomeViewModel
     
    
     
@@ -52,6 +52,7 @@ struct SavedLocationSearchView: View {
 #Preview {
     NavigationStack {
         SavedLocationSearchView(savedLocationViewModel: .home, user: AppUser.empty())
+            .environmentObject(HomeViewModel(userService: SupabaseUserService(), tripService: SupabaseTripService()))
     }
         
 }

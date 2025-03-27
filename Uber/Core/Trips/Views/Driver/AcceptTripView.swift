@@ -9,31 +9,26 @@ import SwiftUI
 
 struct AcceptTripView: View {
     
-    @Binding var trip: Trip?
+    @Binding var isPresented: Bool
+    let trip: Trip
     @EnvironmentObject private var homeViewModel: HomeViewModel
     
     
     var fetchedPickupRoute: Bool {
-        return trip?.distanceToPickup != nil && trip?.travelTimeToPickup != nil
+        return trip.distanceToPickup != nil && trip.travelTimeToPickup != nil
     }
     
     var fetchedDropoffRoute: Bool {
-        return trip?.distanceToDropoff != nil && trip?.travelTimeToDropoff != nil
+        return trip.distanceToDropoff != nil && trip.travelTimeToDropoff != nil
     }
     
     
     var body: some View {
         
-        BottomSheet(isPresented: Binding<Bool>(
-            get: {
-                trip != nil
-            }, set: { _, __ in
-                
-            }
-        ), minHeight: UIScreen.main.bounds.height * 0.5,
+        BottomSheet(isPresented: $isPresented
+        , minHeight: UIScreen.main.bounds.height * 0.5,
                     maxHeight: UIScreen.main.bounds.height * 0.5) {
             
-            if let trip = trip {
                 VStack (alignment: .leading) {
                       // ride type
                     HStack  {
@@ -158,15 +153,15 @@ struct AcceptTripView: View {
                     }.padding()
                         .padding(.bottom,10)
                 }
-            } else {
-                
-            }
+           
         }
     }
 }
 
 #Preview {
-    AcceptTripView(trip: .constant(Trip.empty()))
-        .environmentObject(HomeViewModel())
+    AcceptTripView(isPresented: .constant(true), trip: Trip.empty())
+        .environmentObject(HomeViewModel(
+            userService: SupabaseUserService(), tripService: SupabaseTripService()
+        ))
         
 }
