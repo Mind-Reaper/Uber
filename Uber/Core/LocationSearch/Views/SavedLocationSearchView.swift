@@ -22,7 +22,7 @@ struct SavedLocationSearchView: View {
     var body: some View {
         VStack {
             
-            TextField("Search for a location..", text: $homeViewModel.queryFragment)
+            TextField("Search for a location..", text: $homeViewModel.droppoffQueryFragment)
                 .frame(height: 32)
                 .padding(.horizontal)
                 .cornerRadius(10)
@@ -39,7 +39,7 @@ struct SavedLocationSearchView: View {
             
         }
         .onAppear {
-            self.homeViewModel.queryFragment = (savedLocationViewModel == .home ? user.home?.title : user.work?.title) ?? ""
+            self.homeViewModel.droppoffQueryFragment = (savedLocationViewModel == .home ? user.home?.title : user.work?.title) ?? ""
         }
         .navigationTitle(savedLocationViewModel.title)
             .navigationBarTitleDisplayMode(.large)

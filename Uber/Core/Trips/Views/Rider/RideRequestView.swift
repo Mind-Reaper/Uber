@@ -35,7 +35,7 @@ struct RideRequestView: View {
                         
                         VStack(alignment: .leading, spacing: 24)  {
                             HStack {
-                                Text("Current location")
+                                Text(homeViewModel.selectedPickupLocation?.title ?? "Current location")
                                     .font(.system(size: 16, weight: .semibold))
                                 
                                 Spacer()
@@ -45,7 +45,7 @@ struct RideRequestView: View {
                             }
                             .padding(.bottom, 10)
                             HStack {
-                                Text(homeViewModel.selectedUberLocation?.title ?? "Destination")
+                                Text(homeViewModel.selectedDropoffLocation?.title ?? "Destination")
                                     .font(.system(size: 16, weight: .semibold))
                                 
                                 Spacer()

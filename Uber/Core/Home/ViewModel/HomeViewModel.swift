@@ -26,14 +26,39 @@ class HomeViewModel: NSObject, ObservableObject {
     // MARK: - Location Search Properties
     
     @Published var results = [MKLocalSearchCompletion]()
-    @Published var selectedUberLocation: UberLocation?
+    
+    @Published var selectedPickupLocation: UberLocation? {
+        didSet {
+            pickupQueryFragment = selectedPickupLocation?.title ?? ""
+        }
+    }
+    @Published var selectedDropoffLocation: UberLocation? {
+        didSet {
+            droppoffQueryFragment = selectedDropoffLocation?.title ?? ""
+        }
+    }
+    
+    
     @Published var pickupTime: Date?
     @Published var dropoffTime: Date?
     var userLocation: CLLocationCoordinate2D?
     private let searchCompleter = MKLocalSearchCompleter()
-    var queryFragment: String = "" {
+    
+    var pickupQueryFragment: String = "" {
         didSet {
-            searchCompleter.queryFragment = queryFragment
+            searchCompleter.queryFragment = pickupQueryFragment
+            if (pickupQueryFragment.isEmpty) {
+                results.removeAll()
+            }
+        }
+    }
+    
+    var droppoffQueryFragment: String = "" {
+        didSet {
+            searchCompleter.queryFragment = droppoffQueryFragment
+            if (droppoffQueryFragment.isEmpty) {
+                results.removeAll()
+            }
         }
     }
     
@@ -45,7 +70,8 @@ class HomeViewModel: NSObject, ObservableObject {
         super.init()
         fetchAppUser()
         searchCompleter.delegate = self
-        searchCompleter.queryFragment = queryFragment
+        searchCompleter.resultTypes = [.address, .pointOfInterest]
+        searchCompleter.queryFragment = droppoffQueryFragment
     }
     
     
@@ -95,7 +121,7 @@ extension HomeViewModel {
     func requestTrip(rideType: RideType) {
         guard let driver = drivers.first else { return }
         guard let currentUser = currentUser else { return }
-        guard let dropoffLocation = selectedUberLocation else { return }
+        guard let dropoffLocation = selectedDropoffLocation else { return }
         let userLocation = CLLocation(latitude: currentUser.coordinates.latitude, longitude: currentUser.coordinates.longitude)
         getUberLocationFromCLLocation(userLocation) { riderLocation in
             guard let riderLocation = riderLocation else { return }
@@ -158,17 +184,6 @@ extension HomeViewModel {
             .store(in: &cancellables)
 
     }
-    
-//    func fetchTrips() {
-//        guard let currentUser = currentUser, currentUser.accountType == .driver else { return }
-//       SupabaseTripService.shared.fetchTrips(forDriver: currentUser.uid) { trips in
-//           if let trip = trips.first {
-//               self.trip = trip
-//               
-//               
-//           }
-//        }
-//    }
     
     
     func rejectTrip() {
@@ -234,7 +249,7 @@ extension HomeViewModel {
     func selectLocation(_ localSearch: MKLocalSearchCompletion, config: LocationResultViewConfig) {
         locationSearch(forLocalSearchCompletion: localSearch) { response, error in
             if let error = error {
-                print("DEBUG: Error searching for location: \(error.localizedDescription)")
+                debugPrint("Error searching for location: \(error.localizedDescription)")
                 return
             }
             
@@ -243,8 +258,13 @@ extension HomeViewModel {
             let uberLocation = UberLocation(title: localSearch.title, address: localSearch.subtitle, coordinate: UserCoordinates.from(coordinate: coordinate))
             
             switch config {
-            case .ride:
-                self.selectedUberLocation = uberLocation
+            case .ride(let viewModel):
+                if viewModel == .pickup {
+                    self.selectedPickupLocation = uberLocation
+                } else {
+                    self.selectedDropoffLocation = uberLocation
+                }
+               
             case .savedLocation(let viewModel):
                 guard let uid = SupabaseManager.auth.currentUser?.id.uuidString else { return }
                 let savedLocation = SavedLocation.fromUberLocation(uberLocation)
@@ -268,7 +288,7 @@ extension HomeViewModel {
             }
             
             
-            print("DEBUG: Location coordinates \(coordinate)")
+            debugPrint("Location coordinates \(coordinate)")
         }
     }
     
@@ -281,21 +301,21 @@ extension HomeViewModel {
     }
     
     func computeRidePrice(forType type: RideType) -> Double {
-        guard let coordinate = selectedUberLocation?.coordinate else { return 0.0 }
-        guard let userLocationCoordinate = self.userLocation else {return 0.0}
+        guard let dropoffCoordinate = selectedDropoffLocation?.coordinate else { return 0.0 }
+        guard let pickupCoordinate = selectedPickupLocation?.coordinate else { return 0.0 }
         
-        let userLocation = CLLocation(latitude: userLocationCoordinate.latitude, longitude: userLocationCoordinate.longitude)
+        let userLocation = CLLocation(latitude: pickupCoordinate.latitude, longitude: pickupCoordinate.longitude)
         
-        let destination = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        let destination = CLLocation(latitude: dropoffCoordinate.latitude, longitude: dropoffCoordinate.longitude)
         
         let tripDistanceInMeters = destination.distance(from: userLocation)
         return type.computePrice(for: tripDistanceInMeters)
         
     }
     
-    func getDestinationRoute(from userLocation: CLLocationCoordinate2D, to destination: CLLocationCoordinate2D,
+    func getDestinationRoute(from pickup: CLLocationCoordinate2D, to destination: CLLocationCoordinate2D,
                              completion: @escaping (MKRoute) -> Void) {
-        let userPlacemark = MKPlacemark(coordinate: userLocation)
+        let userPlacemark = MKPlacemark(coordinate: pickup)
         let destPlacemark = MKPlacemark(coordinate: destination)
         let request = MKDirections.Request()
         request.source = MKMapItem(placemark: userPlacemark)
@@ -305,7 +325,7 @@ extension HomeViewModel {
         
         directions.calculate { response, error in
             if let error = error {
-                print("Error calculating directions: \(error.localizedDescription)")
+                debugPrint("Error calculating directions: \(error.localizedDescription)")
                 return
             }
             

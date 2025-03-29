@@ -12,18 +12,13 @@ import MapKit
 struct MapViewRepresentable: UIViewRepresentable {
     let mapView = MKMapView()
     @Binding var mapState: MapViewState
-//    @EnvironmentObject var locationViewModel: HomeViewModel
     @EnvironmentObject var homeViewModel: HomeViewModel
     
-    
-    
     func makeUIView(context: Context) -> some UIView {
-       
         mapView.delegate = context.coordinator
         mapView.isRotateEnabled = false
         mapView.showsUserLocation = true
         mapView.userTrackingMode = .follow
-        
         return mapView
     }
     
@@ -34,12 +29,13 @@ struct MapViewRepresentable: UIViewRepresentable {
             context.coordinator.addDriversToMap(homeViewModel.drivers)
             break
         case .searchingForLocation:
+            context.coordinator.setCurrentLocation()
             context.coordinator.clearMapView()
             break
         case .locationSelected:
-            if let coordinate = homeViewModel.selectedUberLocation?.coordinate {
-                context.coordinator.addAndSelectAnnonation(withCoordinate: coordinate.toCLLocationCoordinate2D())
-                context.coordinator.configurePolyline(withDestinationCoordinate: coordinate.toCLLocationCoordinate2D())
+            if let pickupCoordinates = homeViewModel.selectedPickupLocation?.coordinate, let dropoffCoordinates = homeViewModel.selectedDropoffLocation?.coordinate {
+                context.coordinator.addAndSelectAnnonation(withPickup: pickupCoordinates.toCLLocationCoordinate2D(), dropoff: dropoffCoordinates.toCLLocationCoordinate2D())
+                context.coordinator.configurePolyline(withPickup: pickupCoordinates.toCLLocationCoordinate2D(), dropoff: dropoffCoordinates.toCLLocationCoordinate2D())
             }
             break
         case .tripAccepted:
@@ -92,7 +88,7 @@ extension MapViewRepresentable {
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let polyline = overlay as? MKPolyline {
                 let renderer = MKPolylineRenderer(polyline: polyline)
-                renderer.strokeColor = UIColor(Color.theme.foregroundColor)
+                renderer.strokeColor = UIColor(.foreground)
                 renderer.lineWidth = 4
                 return renderer
             }
@@ -101,40 +97,50 @@ extension MapViewRepresentable {
         
         func mapView(_ mapView: MKMapView, viewFor annotation: any MKAnnotation) -> MKAnnotationView? {
             if let annotation = annotation as? DriverAnnotation {
-                let view = MKAnnotationView(annotation: annotation, reuseIdentifier: "driver")
+                let view = MKAnnotationView(annotation: annotation, reuseIdentifier: annotation.uid)
                 view.image = UIImage(imageLiteralResourceName: "driver-annotation")
                 return view
             }
+            
+            if let annonation = annotation as? LocationAnnotation {
+                let view = MKAnnotationView(annotation: annotation, reuseIdentifier: "location")
+                debugPrint("Location Annonation found: \(annonation.viewModel)")
+                view.image = UIImage(imageLiteralResourceName: annonation.viewModel == .pickup ? "circle-annotation" : "square-annotation")
+                    .resized(to: CGSize(width: 20, height: 20))
+                    
+                return view
+            }
+            
+            
             return nil
         }
         
         // MARK: - Helpers
         
-        func addAndSelectAnnonation(withCoordinate coordinate: CLLocationCoordinate2D) {
-            print("DEBUG: Annotations: \(parent.mapView.annotations)")
+        func addAndSelectAnnonation(withPickup pickup: CLLocationCoordinate2D, dropoff: CLLocationCoordinate2D) {
+            debugPrint("Annotations: \(parent.mapView.annotations)")
             if parent.mapView.annotations.count > 1 {
                 return
             }
             parent.mapView.removeAnnotations(parent.mapView.annotations)
-            let anno = MKPointAnnotation()
-            anno.coordinate = coordinate
-            parent.mapView.addAnnotation(anno)
-            parent.mapView.selectAnnotation(anno, animated: true)
+            let pickupAnno = LocationAnnotation(coordinate: pickup, viewModel: .pickup)
+            let dropffAnno = LocationAnnotation(coordinate: dropoff, viewModel: .dropoff)
+            pickupAnno.coordinate = pickup
+            dropffAnno.coordinate = dropoff
+            parent.mapView.addAnnotations([pickupAnno, dropffAnno])
+//            parent.mapView.selectAnnotation(anno, animated: true)
             
         }
         
         
-        
-        func configurePolyline(withDestinationCoordinate coordinate: CLLocationCoordinate2D) {
-            
+        func configurePolyline(withPickup pickup: CLLocationCoordinate2D, dropoff: CLLocationCoordinate2D) {
             if parent.mapView.overlays.count > 0 {
                 return
             }
             
-            guard let userLocationCoordinate = self.userLocationCoordinate else {
-                return
-            }
-            parent.homeViewModel.getDestinationRoute(from: userLocationCoordinate, to: coordinate) { route in
+           
+            parent.homeViewModel.getDestinationRoute(from: pickup, to: dropoff) { route in
+              
                 self.parent.mapView.addOverlay(route.polyline)
                 
                 let rect = self.parent.mapView.mapRectThatFits(route.polyline.boundingMapRect,
@@ -160,6 +166,18 @@ extension MapViewRepresentable {
                 DriverAnnotation(driver: driver)
             }
             self.parent.mapView.addAnnotations(driverAnnotations)
+        }
+        
+        func setCurrentLocation() {
+            guard self.parent.homeViewModel.selectedPickupLocation == nil else { return }
+            guard let userLocationCoordinate = self.userLocationCoordinate else { return }
+            let location = CLLocation(latitude: userLocationCoordinate.latitude, longitude: userLocationCoordinate.longitude)
+            self.parent.homeViewModel.getUberLocationFromCLLocation(location) { currentLocation in
+                if let currentLocation = currentLocation {
+                    self.parent.homeViewModel.selectedPickupLocation = currentLocation
+                }
+               
+            }
         }
         
     }

@@ -9,8 +9,9 @@ import SwiftUI
 
 struct LocationSearchView: View {
     
-    @State private var pickupLocationText: String = ""
+
     @EnvironmentObject var homeViewModel: HomeViewModel
+    @FocusState private var focusedField: LocationSearchViewModel?
     
     var body: some View {
         VStack {
@@ -31,12 +32,26 @@ struct LocationSearchView: View {
                 .padding()
                
                 VStack {
-                    TextField("Pickup Location", text: $pickupLocationText)
-                        .submitLabel(.done)
+                    TextField("Pickup Location", text: $homeViewModel.pickupQueryFragment)
+                        .focused($focusedField, equals: .pickup)
+                        .submitLabel(.next)
                         
                         
                     Divider()
-                    TextField("Where to?", text: $homeViewModel.queryFragment)
+                    TextField("Where to?", text: $homeViewModel.droppoffQueryFragment)
+                        .focused($focusedField, equals: .dropoff)
+                    
+                        
+                }.onChange(of: focusedField) { oldValue, newValue in
+                    if focusedField == .pickup {
+                        homeViewModel.pickupQueryFragment = homeViewModel.pickupQueryFragment
+                    }
+                    
+                    if focusedField == .dropoff {
+                        homeViewModel.droppoffQueryFragment = homeViewModel.droppoffQueryFragment
+                    }
+                    
+                    
                 }
             }
             
@@ -49,10 +64,18 @@ struct LocationSearchView: View {
             
             
             // list view
+            if let focusedField = focusedField {
+                LocationSearchResultView(homeViewModel: homeViewModel, config: .ride(focusedField))
+            } else {
+                Spacer()
+            }
+           
             
-            LocationSearchResultView(homeViewModel: homeViewModel, config: .ride)
             
-            
+        }.onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.focusedField = .dropoff
+            }
         }
     }
 }

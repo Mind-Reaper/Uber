@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+
+
 struct LocationSearchResultView: View {
     
     @StateObject var homeViewModel: HomeViewModel
@@ -38,6 +40,6 @@ struct LocationSearchResultView: View {
     LocationSearchResultView(
         homeViewModel: HomeViewModel(
             userService: SupabaseUserService(), tripService: SupabaseTripService()
-        ), config: .ride)
+        ), config: .ride(.pickup))
     
 }

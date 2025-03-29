@@ -15,5 +15,5 @@ func debugPrint( _ items: Any...,
     let itemsAsString: [String] = items.map { item in
         return String(describing: item)
     }
-    print("DEBUG: \(itemsAsString.joined(separator: separator))", terminator: terminator)
+    print("DEBUG: \(itemsAsString.joined(separator: separator))\n", terminator: terminator)
 }

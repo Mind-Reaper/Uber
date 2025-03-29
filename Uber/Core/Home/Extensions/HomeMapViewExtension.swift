@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 extension HomeView {
     var mapView: some View {
@@ -19,9 +20,12 @@ extension HomeView {
                         showSideMenu: showSideMenuBinding,
                         showBackIcon: mapState.notMainView,
                         action: mapState.notMainView ?  {
-                            self.homeViewModel.selectedUberLocation = nil
+                            
                             withAnimation {
                                 mapState = mapState == .locationSelected ? .searchingForLocation : .noInput
+                            }
+                            if mapState == .noInput {
+                                self.homeViewModel.selectedDropoffLocation = nil
                             }
                         } : nil
                     )
@@ -46,7 +50,7 @@ extension HomeView {
             }
             .background(mapState == .searchingForLocation ? Color.theme.backgroundColor : .clear)
             
-            if let user = authViewModel.currentUser, user.accountType == .rider, homeViewModel.trip != nil {
+            if let user = authViewModel.currentUser, user.accountType == .rider {
                 if mapState == .locationSelected {
                     RideRequestView()
                         .transition(.move(edge: .bottom))
@@ -98,8 +102,9 @@ extension HomeView {
                 homeViewModel.userLocation = location
             }
         }
-        .onReceive(homeViewModel.$selectedUberLocation) { location in
-            if let _ = location {
+        .onReceive(Publishers.CombineLatest( homeViewModel.$selectedPickupLocation, homeViewModel.$selectedDropoffLocation)) { pickup, dropoff in
+            
+            if pickup != nil && dropoff != nil {
                 withAnimation {
                     self.mapState = .locationSelected
                 }
