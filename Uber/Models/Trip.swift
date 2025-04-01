@@ -9,8 +9,8 @@ import Foundation
 
 
 enum TripState: String, Codable {
-    case requested
-    case rejected
+    case completed
+    case ongoing
     case accepted
     case cancelled
 }
@@ -113,7 +113,7 @@ struct Trip: Identifiable, Codable {
             ),
             tripCost: 53.0,
             rideType: .uberX,
-            state: .requested
+            state: .accepted
         )
     }
 }

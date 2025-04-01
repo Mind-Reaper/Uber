@@ -76,24 +76,28 @@ extension HomeView {
                 }
             }
             
-            if authViewModel.currentUser?.accountType == .driver, homeViewModel.trip != nil {
+            if authViewModel.currentUser?.accountType == .driver, !homeViewModel.driverRequests.isEmpty {
                 AcceptTripView(
                     isPresented:  Binding<Bool>(get: {mapState == .tripRequested}, set: { _, __ in
                         
                     }),
-                    trip: homeViewModel.trip!
+                    request: homeViewModel.driverRequests.first!
                 )
                 
-                PickupView(
-                    isPresented:  Binding<Bool>(get: {mapState == .tripAccepted}, set: { _, __ in
-                        
-                    }),
-                    trip: homeViewModel.trip!
-                )
-                
-                TripCancelledView(isPresented: Binding<Bool>(get: {mapState == .tripCancelled}, set: { _ in
+                if (homeViewModel.trip != nil) {
+                    PickupView(
+                        isPresented:  Binding<Bool>(get: {mapState == .tripAccepted}, set: { _, __ in
+                            
+                        }),
+                        trip: homeViewModel.trip!
+                    )
                     
-                }))
+                    TripCancelledView(isPresented: Binding<Bool>(get: {mapState == .tripCancelled}, set: { _ in
+                        
+                    }))
+                }
+                
+               
                 
             }
         }
@@ -118,16 +122,29 @@ extension HomeView {
                 }
             debugPrint("Trip State: \(trip.state)")
                 switch trip.state {
-                case .requested:
-                    self.mapState = .tripRequested
-                case .rejected:
+                case .completed:
                     self.mapState = .noInput
-                case .accepted:
+                case .accepted, .ongoing:
                     self.mapState = .tripAccepted
                 case .cancelled:
                     self.mapState = .tripCancelled
                 }
             }
+        }
+        .onReceive(Publishers.CombineLatest( homeViewModel.$riderRequest, homeViewModel.$driverRequests)) { riderRequest, driverRequests in
+           
+            guard let user = authViewModel.currentUser else { return }
+            
+            if user.accountType == .rider, riderRequest?.state == .requested {
+                self.mapState = .tripRequested
+            }
+            
+            if user.accountType == .driver, !driverRequests.isEmpty {
+                self.mapState = .tripRequested
+            }
+                
+              
+           
         }
     }
 }

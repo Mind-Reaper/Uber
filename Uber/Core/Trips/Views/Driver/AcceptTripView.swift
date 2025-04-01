@@ -10,16 +10,23 @@ import SwiftUI
 struct AcceptTripView: View {
     
     @Binding var isPresented: Bool
-    let trip: Trip
+    let request: TripRequest
     @EnvironmentObject private var homeViewModel: HomeViewModel
+    @EnvironmentObject private var authViewModel: AuthViewModel
+    
+    
+    @State var distanceToPickup: Double? = nil
+    @State var travelTimeToPickup: Int? = nil
+    @State var distanceToDropoff: Double? = nil
+    @State var travelTimeToDropoff: Int? = nil
     
     
     var fetchedPickupRoute: Bool {
-        return trip.distanceToPickup != nil && trip.travelTimeToPickup != nil
+        return distanceToPickup != nil && travelTimeToPickup != nil
     }
     
     var fetchedDropoffRoute: Bool {
-        return trip.distanceToDropoff != nil && trip.travelTimeToDropoff != nil
+        return distanceToDropoff != nil && travelTimeToDropoff != nil
     }
     
     
@@ -37,7 +44,7 @@ struct AcceptTripView: View {
                                 .font(.callout)
                                 .foregroundStyle(.buttonForeground)
                             
-                            Text(trip.rideType.description)
+                            Text(request.rideType.description)
                                 .font(.headline)
                                 .foregroundStyle(.buttonForeground)
                         }.padding(4)
@@ -60,7 +67,7 @@ struct AcceptTripView: View {
                             }
                             .onTapGesture {
                                 withAnimation {
-                                    homeViewModel.rejectTrip()
+                                    homeViewModel.rejectTripRequest(request: request)
                                 }
                                 
                             }
@@ -71,7 +78,7 @@ struct AcceptTripView: View {
                     HStack  {
                         VStack (alignment: .leading) {
                             Text(
-                                trip.tripCost.toCurrency()
+                                request.tripCost.toCurrency()
                             )
                             .font(.system(size: 50))
                             .fontWeight(.bold)
@@ -109,12 +116,12 @@ struct AcceptTripView: View {
                         VStack(alignment: .leading)  {
                             Text(
                                 fetchedPickupRoute ?
-                                "\(trip.travelTimeToPickup!) mins (\(trip.distanceToPickup!.distanceInMilesString()) mi) away" : "Getting pickup route details..."
+                                "\(travelTimeToPickup!) mins (\(distanceToPickup!.distanceInMilesString()) mi) away" : "Getting pickup route details..."
                             )
                                 .font(.system(size: 16, weight: .semibold))
                                 .italic(!fetchedPickupRoute)
                                 .padding(.bottom, 4)
-                            Text(trip.pickupLocation.address)
+                            Text(request.pickupLocation.address)
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.gray)
                                 .padding(.bottom, 20)
@@ -122,12 +129,12 @@ struct AcceptTripView: View {
                             
                             Text(
                                 fetchedDropoffRoute ?
-                                "\(trip.travelTimeToDropoff!) mins (\(trip.distanceToDropoff!.distanceInMilesString()) mi) trip" : "Getting trip route details..."
+                                "\(travelTimeToDropoff!) mins (\(distanceToDropoff!.distanceInMilesString()) mi) trip" : "Getting trip route details..."
                             )
                                 .font(.system(size: 16, weight: .semibold))
                                 .italic(!fetchedDropoffRoute)
                                 .padding(.bottom, 4)
-                            Text(trip.dropoffLocation.address)
+                            Text(request.dropoffLocation.address)
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.gray)
                             
@@ -138,7 +145,7 @@ struct AcceptTripView: View {
                     // action button
                     
                     Button {
-                        homeViewModel.acceptTrip()
+                        homeViewModel.acceptTrip(request: request)
                     } label: {
                         Text("Accept")
                             .foregroundColor(Color.theme.buttonForegroundColor)
@@ -153,15 +160,28 @@ struct AcceptTripView: View {
                     }.padding()
                         .padding(.bottom,10)
                 }
-           
+                .onAppear {
+                    
+                    guard let currentUser = authViewModel.currentUser else {return}
+                    
+                    homeViewModel.getDestinationRoute(from: currentUser.coordinates.toCLLocationCoordinate2D(), to: request.pickupLocation.toCLLocationCoordinate2D()) { route in
+                        self.travelTimeToPickup = Int(route.expectedTravelTime / 60)
+                        self.distanceToPickup = route.distance
+                    }
+                    
+                    homeViewModel.getDestinationRoute(from: request.pickupLocation.toCLLocationCoordinate2D(), to: request.dropoffLocation.toCLLocationCoordinate2D()) { route in
+                        self.travelTimeToDropoff = Int(route.expectedTravelTime / 60)
+                        self.distanceToDropoff = route.distance
+                    }
+                }
         }
     }
 }
 
-#Preview {
-    AcceptTripView(isPresented: .constant(true), trip: Trip.empty())
-        .environmentObject(HomeViewModel(
-            userService: SupabaseUserService(), tripService: SupabaseTripService()
-        ))
-        
-}
+//#Preview {
+//    AcceptTripView(isPresented: .constant(true), request: Trip.empty())
+//        .environmentObject(HomeViewModel(
+//            userService: SupabaseUserService(), tripService: SupabaseTripService()
+//        ))
+//        
+//}

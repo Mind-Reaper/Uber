@@ -11,20 +11,35 @@ import Foundation
 
 protocol TripService {
     
-    func createTrip(trip: Trip, completion: @escaping (String?) -> Void)
-    func fetchTrips(forDriver driverUid: String, completion: @escaping ([Trip]) -> Void)
+    func createTripRequest(tripRequest: TripRequest, completion: @escaping (String?) -> Void)
+    func updateTripRequest(id: String, update: UpdateTripRequest, completion: @escaping (Bool) -> Void)
+    
     func updateTrip(id: String, update: UpdateTrip, completion: @escaping (Bool) -> Void)
-    func addTripObserver(forRider riderUid: String) -> AnyPublisher<Trip, Error>
-    func addTripObserver(forDriver driverUid: String) -> AnyPublisher<Trip, Error>
+    
+//    func fetchTrips(forDriver driverUid: String, completion: @escaping ([Trip]) -> Void)
+    func fetchTripRequests(forDriver driverUid: String, completion: @escaping ([TripRequest]) -> Void)
+    
+    func addTripObserver(for user: AppUser) -> AnyPublisher<Trip, Error>
+//    func addTripObserver(forDriver driverUid: String) -> AnyPublisher<Trip, Error>
+    func addTripRequestObserver(forRider riderUid: String) -> AnyPublisher<TripRequest, Error>
+    func addTripRequestObserver(forDriver driver: String) -> AnyPublisher<TripRequest, Error>
     
 }
 
 extension TripService {
-     var tableName: String {
+     var tripsTable: String {
         "trips"
     }
     
-    var channelName: String {
+    var tripRequestsTable: String {
+       "trip-requests"
+   }
+    
+    var tripsChannel: String {
         "trips_channel"
+    }
+    
+    var tripRequestsChannel: String {
+        "trip_requests_channel"
     }
 }
