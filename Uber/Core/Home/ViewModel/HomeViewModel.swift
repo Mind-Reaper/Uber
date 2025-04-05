@@ -109,7 +109,7 @@ class HomeViewModel: NSObject, ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 if case .failure (let error) = completion {
-                    debugPrint("Error in observe trip: \(error)")
+                    debugPrint("Error in addTripObserverForUser: \(error)")
                 }
             } receiveValue: { trip in
                 if currentUser.accountType == .driver {
@@ -162,7 +162,7 @@ extension HomeViewModel {
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 if case .failure (let error) = completion {
-                    debugPrint("Error in observe trip request: \(error)")
+                    debugPrint("Error in observe rider request: \(error)")
                 }
             } receiveValue: { request in
                 self.riderRequest = request

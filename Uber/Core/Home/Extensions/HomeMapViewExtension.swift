@@ -50,56 +50,107 @@ extension HomeView {
             }
             .background(mapState == .searchingForLocation ? Color.theme.backgroundColor : .clear)
             
-            if let user = authViewModel.currentUser, user.accountType == .rider {
-                if mapState == .locationSelected {
-                    RideRequestView()
-                        .transition(.move(edge: .bottom))
-                } else if homeViewModel.trip != nil {
-                    TripRequestedView(
-                        isPresented: Binding<Bool>(get: {mapState == .tripRequested}, set: { _, __ in
-                            
-                        }),
-                        trip: homeViewModel.trip!
-                    )
-                    
-                    TripAcceptedView(
-                        isPresented: Binding<Bool>(get: {mapState == .tripAccepted}, set: { _ in
-                            
-                        }),
-                        trip: homeViewModel.trip!
-                    )
-                    
-                    
-                    TripCancelledView(isPresented: Binding<Bool>(get: {mapState == .tripCancelled}, set: { _ in
-                        
-                    }))
-                }
-            }
             
-            if authViewModel.currentUser?.accountType == .driver, !homeViewModel.driverRequests.isEmpty {
-                AcceptTripView(
-                    isPresented:  Binding<Bool>(get: {mapState == .tripRequested}, set: { _, __ in
-                        
-                    }),
-                    request: homeViewModel.driverRequests.first!
-                )
-                
-                if (homeViewModel.trip != nil) {
-                    PickupView(
-                        isPresented:  Binding<Bool>(get: {mapState == .tripAccepted}, set: { _, __ in
-                            
-                        }),
-                        trip: homeViewModel.trip!
-                    )
-                    
-                    TripCancelledView(isPresented: Binding<Bool>(get: {mapState == .tripCancelled}, set: { _ in
-                        
-                    }))
-                }
-                
-               
-                
-            }
+            let user = authViewModel.currentUser
+
+            let isRider = user?.accountType == .rider
+            let isDriver = user?.accountType == .driver
+            
+            
+            let trip = homeViewModel.trip
+            let driverRequests = homeViewModel.driverRequests
+            let riderRequest = homeViewModel.riderRequest
+            
+            
+            RideRequestView(
+                isPresented: (mapState == .locationSelected && isRider).asBinding
+            )
+            
+            TripRequestedView(
+                isPresented: (mapState == .tripRequested && riderRequest != nil && isRider)
+                    .asBinding,
+                tripRequest: riderRequest ?? TripRequest.empty()
+            )
+            
+            TripAcceptedView(
+                isPresented: (mapState == .tripAccepted && trip != nil && isRider).asBinding,
+                trip: trip ?? Trip.empty()
+            )
+            
+            
+            TripCancelledView(
+                isPresented: (mapState == .tripCancelled).asBinding
+            )
+            
+            
+            AcceptTripView(
+                isPresented: (mapState == .tripRequested && !driverRequests.isEmpty && isDriver)
+                    .asBinding,
+                request: driverRequests.first ?? TripRequest.empty()
+            )
+            
+            PickupView(
+                isPresented: (mapState == .tripAccepted && trip != nil && isDriver)
+                    .asBinding,
+                trip: trip ?? Trip.empty()
+            )
+            
+            
+            
+            
+            
+//            if let user = authViewModel.currentUser, user.accountType == .rider {
+//                if mapState == .locationSelected {
+////                    RideRequestView()
+////                        .transition(.move(edge: .bottom))
+//                } else if homeViewModel.riderRequest != nil {
+//                    TripRequestedView(
+//                        isPresented: Binding<Bool>(get: {mapState == .tripRequested}, set: { _, __ in
+//                            
+//                        }),
+//                        tripRequest: homeViewModel.riderRequest!
+//                    )
+//                    
+//                } else if homeViewModel.trip != nil {
+//                    
+//                    TripAcceptedView(
+//                        isPresented: Binding<Bool>(get: {mapState == .tripAccepted}, set: { _ in
+//                            
+//                        }),
+//                        trip: homeViewModel.trip!
+//                    )
+//                    
+//                    
+//                    TripCancelledView(isPresented: Binding<Bool>(get: {mapState == .tripCancelled}, set: { _ in
+//                        
+//                    }))
+//                }
+//            }
+//            
+//            if authViewModel.currentUser?.accountType == .driver, !homeViewModel.driverRequests.isEmpty {
+//                AcceptTripView(
+//                    isPresented:  Binding<Bool>(get: {mapState == .tripRequested}, set: { _, __ in
+//                        
+//                    }),
+//                    request: homeViewModel.driverRequests.first!
+//                )
+//                
+//                if (homeViewModel.trip != nil) {
+//                    PickupView(
+//                        isPresented:  Binding<Bool>(get: {mapState == .tripAccepted}, set: { _, __ in
+//                            
+//                        }),
+//                        trip: homeViewModel.trip!
+//                    )
+//                    
+//                    TripCancelledView(isPresented: Binding<Bool>(get: {mapState == .tripCancelled}, set: { _ in
+//                        
+//                    }))
+//                }
+//                
+//               
+//                
+//            }
         }
         .onReceive(LocationManager.shared.$userLocation) { location in
             if let location = location {

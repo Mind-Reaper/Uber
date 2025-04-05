@@ -47,7 +47,33 @@ struct TripRequest: Identifiable, Codable, Equatable {
         case state
         case seenBy = "seen_by"
     }
+    
+    
+    static func empty() -> TripRequest {
+        return TripRequest(
+            id: "",
+            riderUid: "",
+            driverUid: nil,
+            riderName: "Daniel",
+            driverName: nil,
+            pickupLocation: UberLocation(
+                title: "Philz Coffee", address: "123 Main St", coordinate: UserCoordinates(
+                    latitude: 36.4954, longitude: 121.7449
+                )
+            ),
+            dropoffLocation: UberLocation(
+                title: "Coffee Lovers", address: "1696 Tully Rd, San Jose, CA 95125", coordinate: UserCoordinates(
+                    latitude: 22.3964, longitude: 114.1095
+                )
+            ),
+            tripCost: 53.0,
+            rideType: .uberX,
+            state: .requested,
+            seenBy:  []
+        )
+    }
 }
+    
 
 
 struct UpdateTripRequest: Encodable {

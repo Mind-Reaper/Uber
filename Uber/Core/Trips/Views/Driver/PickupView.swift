@@ -14,10 +14,11 @@ struct PickupView: View {
     @EnvironmentObject var homeViewModel: HomeViewModel
     
     var body: some View {
-        BottomSheet(isPresented: $isPresented,
-                    minHeight: UIScreen.main.bounds.height * 0.38,
-                    maxHeight: UIScreen.main.bounds.height * 0.38
-        ) {
+        
+        
+        
+        Color.clear
+            .sheet(isPresented: $isPresented) {
             VStack {
                 
                 HStack {
@@ -68,12 +69,11 @@ struct PickupView: View {
                     
                 }
                 .padding(.horizontal)
- 
-                
-                
-                
-                
             }
+            .interactiveDismissDisabled()
+            .presentationSizing(.fitted)
+            .presentationDetents([.fraction(0.4)])
+            .presentationDragIndicator(.visible)
         }
     }
 }

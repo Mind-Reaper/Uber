@@ -5,6 +5,7 @@ struct BottomSheet<Content: View, Footer: View>: View {
     @GestureState private var dragState: CGFloat = 0
     @State private var position: BottomSheetPosition = .middle
     @State private var allowScroll: Bool = false
+  
 
     
     
@@ -26,6 +27,7 @@ struct BottomSheet<Content: View, Footer: View>: View {
     init(isPresented: Binding<Bool>,
          minHeight: CGFloat = 300,
          maxHeight: CGFloat = UIScreen.main.bounds.height * 0.8,
+         onPresented: (() -> Void)? = nil,
          @ViewBuilder content: () -> Content, @ViewBuilder footer: () -> Footer) {
         self._isPresented = isPresented
         self.minHeight = minHeight

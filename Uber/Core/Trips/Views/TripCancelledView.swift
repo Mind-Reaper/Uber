@@ -13,10 +13,7 @@ struct TripCancelledView: View {
     @EnvironmentObject var homeViewModel: HomeViewModel
     
     var body: some View {
-        BottomSheet(isPresented: $isPresented,
-                    minHeight: UIScreen.main.bounds.height * 0.2,
-                    maxHeight: UIScreen.main.bounds.height * 0.2,
-                    content: {
+        Color.clear.sheet(isPresented: $isPresented) {
             VStack {
                 
                 Text("RIDE CANCELLED")
@@ -28,8 +25,10 @@ struct TripCancelledView: View {
                     homeViewModel.trip = nil
                 }
             }.padding(.horizontal)
-        }) {
-            
+                .interactiveDismissDisabled()
+                    .presentationSizing(.fitted)
+                    .presentationDetents([.fraction(0.2)])
+                    .presentationDragIndicator(.visible)
         }
     }
 }

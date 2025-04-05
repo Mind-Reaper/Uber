@@ -9,13 +9,10 @@ import SwiftUI
 
 struct TripRequestedView: View {
     @Binding var isPresented: Bool
-    let trip: Trip
+    let tripRequest: TripRequest
     
     var body: some View {
-        BottomSheet(isPresented: $isPresented,
-                    minHeight: UIScreen.main.bounds.height * 0.5,
-                    maxHeight: UIScreen.main.bounds.height * 0.5
-        ) {
+        Color.clear.sheet(isPresented: $isPresented) {
             VStack {
                 Text("Ride Requested")
                     .font(.headline)
@@ -60,14 +57,14 @@ struct TripRequestedView: View {
                             
                             VStack(alignment: .leading, spacing: 24)  {
                                 HStack {
-                                    Text(trip.pickupLocation.title)
+                                    Text(tripRequest.pickupLocation.title)
                                         .font(.system(size: 16, weight: .semibold))
                                     
                                    
                                 }
                                 .padding(.bottom, 10)
                                 HStack {
-                                    Text(trip.dropoffLocation.title)
+                                    Text(tripRequest.dropoffLocation.title)
                                         .font(.system(size: 16, weight: .semibold))
                                    
                                 }
@@ -92,10 +89,14 @@ struct TripRequestedView: View {
      
             }
             .padding(.horizontal)
+            .interactiveDismissDisabled()
+                .presentationSizing(.fitted)
+                .presentationDetents([.fraction(0.5)])
+                .presentationDragIndicator(.visible)
         }
     }
 }
 
 #Preview {
-    TripRequestedView(isPresented: .constant(true), trip: Trip.empty())
+    TripRequestedView(isPresented: .constant(true), tripRequest: TripRequest.empty())
 }

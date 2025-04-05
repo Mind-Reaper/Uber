@@ -91,9 +91,8 @@ class SupabaseTripService: TripService {
                     let tripRequests: [TripRequest] = try await SupabaseManager
                         .table(tripRequestsTable)
                         .select()
-                        .eq("driver_uid", value: driverUid)
                         .eq("state", value: TripRequestState.requested.rawValue)
-                        .not("seen_by", operator: .cs, value: driverUid)
+                        .not("seen_by", operator: .cs, value: [driverUid])
                         .execute()
                         .value
     
@@ -146,7 +145,7 @@ class SupabaseTripService: TripService {
             .select()
             .or("rider_uid.eq.\(user.uid),driver_uid.eq.\(user.uid)")
             .in("state", values: [TripState.accepted.rawValue, TripState.ongoing.rawValue])
-            .single()
+            .limit(1)
             
         let changes =  user.accountType == .rider ? channel.postgresChange(
             AnyAction.self,
@@ -163,9 +162,9 @@ class SupabaseTripService: TripService {
         Task {
             do {
                 
-                let currentTrip: Trip? = try await tripPostgres.execute().value
+                let trips: [Trip] = try await tripPostgres.execute().value
                 
-                if let currentTrip = currentTrip {
+                if let currentTrip = trips.first {
                     subject.send(currentTrip)
                 }
                 
@@ -186,7 +185,7 @@ class SupabaseTripService: TripService {
                 }
                 
             } catch {
-                debugPrint("Error adding trip observer \(error.localizedDescription)")
+                debugPrint("Error adding trip observer for user \(error.localizedDescription)")
                 subject.send(completion: .failure(error))
             }
         }
@@ -246,7 +245,7 @@ class SupabaseTripService: TripService {
                 }
                 
             } catch {
-                debugPrint("Error adding trip observer \(error.localizedDescription)")
+                debugPrint("Error adding trip request observer for rider \(error.localizedDescription)")
                 subject.send(completion: .failure(error))
             }
         }
@@ -266,30 +265,18 @@ class SupabaseTripService: TripService {
         let subject = PassthroughSubject<TripRequest, Error>()
         let channel = SupabaseManager.channel(tripRequestsChannel)
         
-        let tripPostgres = SupabaseManager
-            .table(tripRequestsTable)
-            .select()
-            .eq("driver_uid", value: driverUid)
-            .in("state", values: [TripRequestState.requested.rawValue])
-            .single()
+      
             
         let changes =  channel.postgresChange(
             AnyAction.self,
             schema: "public",
             table: tripRequestsTable,
-            filter: .eq("driver_uid", value: driverUid)
+            filter: .eq("state", value: TripRequestState.requested.rawValue)
         )
         
         Task {
             do {
-                
-                let currentTripRequest: TripRequest? = try await tripPostgres.execute().value
-                
-                if let currentTripRequest = currentTripRequest {
-                    subject.send(currentTripRequest)
-                }
-                
-                
+               
                 await channel.subscribe()
                 
                  for try await change in changes {
@@ -306,7 +293,7 @@ class SupabaseTripService: TripService {
                 }
                 
             } catch {
-                debugPrint("Error adding trip observer \(error.localizedDescription)")
+                debugPrint("Error adding trip  request observer for driver \(error.localizedDescription)")
                 subject.send(completion: .failure(error))
             }
         }

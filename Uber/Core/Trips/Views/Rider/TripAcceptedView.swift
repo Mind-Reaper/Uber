@@ -14,10 +14,7 @@ struct TripAcceptedView: View {
     @EnvironmentObject var homeViewModel: HomeViewModel
     
     var body: some View {
-        BottomSheet(isPresented: $isPresented,
-                    minHeight: UIScreen.main.bounds.height * 0.5,
-                    maxHeight:UIScreen.main.bounds.height * 0.5
-        ) {
+        Color.clear.sheet(isPresented: $isPresented) {
             VStack {
                 HStack {
                     Text("Meet the driver at pickup spot by \(trip.pickupLocation.title)")
@@ -88,6 +85,10 @@ struct TripAcceptedView: View {
                 }
                 .padding(.horizontal)
             }
+            .interactiveDismissDisabled()
+                .presentationSizing(.fitted)
+                .presentationDetents([.fraction(0.5)])
+                .presentationDragIndicator(.visible)
         }
     }
 }
