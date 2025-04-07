@@ -10,6 +10,9 @@ import SwiftUI
 struct TripRequestedView: View {
     @Binding var isPresented: Bool
     let tripRequest: TripRequest
+    @EnvironmentObject var homeViewModel: HomeViewModel
+    
+    @State private var confirmationPresented = false
     
     var body: some View {
         Color.clear.sheet(isPresented: $isPresented) {
@@ -83,15 +86,27 @@ struct TripRequestedView: View {
                 }
                 .padding(.bottom)
             
-                CustomButton(title: "CANCEL REQUEST") {
-                    
+                CustomButton(title: "Cancel Request") {
+                    confirmationPresented = true
                 }
      
             }
-            .padding(.horizontal)
+            .padding()
+            .alert("Cancel Request?",
+                   isPresented: $confirmationPresented) {
+                Button("Yes, Cancel", role: .destructive) {
+                    confirmationPresented = false
+                    homeViewModel.cancelTripReqest()
+                }
+                Button("Keep Searching", role: .cancel) {
+                    confirmationPresented = false
+                }
+            } message: {
+                Text("We're still searching for a driver in your area.")
+            }
             .interactiveDismissDisabled()
                 .presentationSizing(.fitted)
-                .presentationDetents([.fraction(0.5)])
+                .presentationDetents([.fraction(0.55)])
                 .presentationDragIndicator(.visible)
         }
     }
@@ -99,4 +114,5 @@ struct TripRequestedView: View {
 
 #Preview {
     TripRequestedView(isPresented: .constant(true), tripRequest: TripRequest.empty())
+        .environmentObject(HomeViewModel(userService: SupabaseUserService(), tripService: SupabaseTripService()))
 }

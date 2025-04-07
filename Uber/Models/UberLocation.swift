@@ -9,7 +9,15 @@ import CoreLocation
 
 
 
-struct UberLocation: Codable {
+struct UberLocation: Codable, Equatable {
+    static func == (lhs: UberLocation, rhs: UberLocation) -> Bool {
+        lhs.coordinate.latitude == rhs.coordinate.latitude &&
+        lhs.coordinate.longitude == rhs.coordinate.longitude
+    }
+    
+    
+    
+    
     let title: String
     let address: String
     let coordinate: UserCoordinates

@@ -53,19 +53,22 @@ struct AppUser: Identifiable, Codable {
             coordinates: UserCoordinates(latitude: 37.38, longitude: -122.05)
         )
     }
-    
-
-    
-    
-    
-    
-    
 }
 
 struct UpdateUser: Encodable {
     var firstname: String?
     var lastname: String?
+    var accountType: AccountType?
     var home: SavedLocation?
     var work: SavedLocation?
     var coordinates: UserCoordinates?
+    
+    enum CodingKeys: String, CodingKey {
+        case firstname
+        case lastname
+        case accountType = "account_type"
+        case home
+        case work
+        case coordinates
+    }
 }

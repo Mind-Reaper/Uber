@@ -13,16 +13,28 @@ struct TripAcceptedView: View {
     let trip: Trip
     @EnvironmentObject var homeViewModel: HomeViewModel
     
+    @State private var confirmationPresented = false
+    
+    
+    
     var body: some View {
+        
+        let travelTime = trip.state == .accepted ? trip.travelDetails?.travelTimeToPickup : trip.travelDetails?.travelTimeToDropoff
+        
         Color.clear.sheet(isPresented: $isPresented) {
+        
             VStack {
                 HStack {
-                    Text("Meet the driver at pickup spot by \(trip.pickupLocation.title)")
-                        .font(.title3)
-                        .fontWeight(.semibold)
+                    Text(
+                        trip.state == .accepted ?
+                        "Meet the driver at pickup spot by \(trip.pickupLocation.title)" :
+                            "Heading to \(trip.dropoffLocation.title)"
+                    )
+                    .font(.title3)
+                    .fontWeight(.semibold)
                     Spacer()
                     VStack {
-                        Text(trip.travelTimeToPickup == nil ? "-" :  "\(trip.travelTimeToPickup!)")
+                        Text(travelTime == nil ? "-" :  "\(travelTime!)")
                             .font(.title2)
                             .fontWeight(.semibold)
                         Text("min")
@@ -71,7 +83,7 @@ struct TripAcceptedView: View {
                     Text("Blue Hyundai Sonata")
                         .fontWeight(.semibold)
                     
-                   
+                    
                 }
                 .padding(.bottom)
                 
@@ -80,16 +92,30 @@ struct TripAcceptedView: View {
                     .frame(height: 2)
                     .padding(.bottom)
                 
-                CustomButton(title: "CANCEL RIDE") {
-                    homeViewModel.cancelTrip()
+                CustomButton(title: "Cancel Ride") {
+                    confirmationPresented = true
                 }
                 .padding(.horizontal)
+                .alert("Cancel Ride?",
+                       isPresented: $confirmationPresented) {
+                    Button("Yes, Cancel Ride", role: .destructive) {
+                        confirmationPresented = false
+                        homeViewModel.cancelTrip()
+                    }
+                    Button("No, Keep Ride", role: .cancel) {
+                        confirmationPresented = false
+                    }
+                } message: {
+                    Text("Are you sure you want to cancel this ride? Cancellation fees may apply based on our policy.")
+                }
             }
+           
             .interactiveDismissDisabled()
-                .presentationSizing(.fitted)
-                .presentationDetents([.fraction(0.5)])
-                .presentationDragIndicator(.visible)
+            .presentationSizing(.fitted)
+            .presentationDetents([.fraction(0.55)])
+            .presentationDragIndicator(.visible)
         }
+        
     }
 }
 

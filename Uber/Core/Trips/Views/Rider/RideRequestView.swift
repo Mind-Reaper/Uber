@@ -12,6 +12,8 @@ struct RideRequestView: View {
     @Binding var isPresented: Bool
     @State private var selectedRideType = RideType.uberX
     @EnvironmentObject var homeViewModel: HomeViewModel
+    
+   
  
     
     var body: some View {
@@ -161,10 +163,13 @@ struct RideRequestView: View {
                         
                     }.background(.ultraThickMaterial)
                     
-                }  .interactiveDismissDisabled()
+                }
+                .interactiveDismissDisabled()
                     .presentationSizing(.fitted)
                     .presentationDetents([.fraction(0.55), .fraction(0.75)])
                     .presentationDragIndicator(.visible)
+                    .presentationBackgroundInteraction(.enabled)
+                    
               
             }
     }

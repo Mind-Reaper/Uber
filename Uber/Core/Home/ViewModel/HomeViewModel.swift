@@ -99,10 +99,6 @@ class HomeViewModel: NSObject, ObservableObject {
     }
     
     
-    func updateTripDetails() {
-        
-    }
-    
     func addTripObserverForUser() {
         guard let currentUser = currentUser else { return }
         tripService.addTripObserver(for: currentUser)
@@ -112,28 +108,8 @@ class HomeViewModel: NSObject, ObservableObject {
                     debugPrint("Error in addTripObserverForUser: \(error)")
                 }
             } receiveValue: { trip in
-                if currentUser.accountType == .driver {
-                    let traveDetailsNeedsUpdate = self.trip == nil
-                    self.trip = trip
-                    self.getDestinationRoute(from: currentUser.coordinates.toCLLocationCoordinate2D(), to: trip.pickupLocation.toCLLocationCoordinate2D()) { route in
-                        self.trip?.travelTimeToPickup = Int(route.expectedTravelTime / 60)
-                        self.trip?.distanceToPickup = route.distance
-                    }
-                    
-                    self.getDestinationRoute(from: trip.pickupLocation.toCLLocationCoordinate2D(), to: trip.dropoffLocation.toCLLocationCoordinate2D()) { route in
-                        self.trip?.travelTimeToDropoff = Int(route.expectedTravelTime / 60)
-                        self.trip?.distanceToDropoff = route.distance
-                    }
-                    if (traveDetailsNeedsUpdate) {
-                        let updateTrip = UpdateTrip(state: .cancelled)
-                        self.tripService.updateTrip(id: trip.id, update: updateTrip) { _ in
-                            
-                        }
-                    }
-                    
-                }
-               
                 self.trip = trip
+                self.updateTripTravelDetails()
             }
             .store(in: &cancellables)
 
@@ -172,7 +148,6 @@ extension HomeViewModel {
     
     
     func requestTrip(rideType: RideType) {
-        guard let driver = drivers.first else { return }
         guard let currentUser = currentUser else { return }
         guard let dropoffLocation = selectedDropoffLocation else { return }
         let userLocation = CLLocation(latitude: currentUser.coordinates.latitude, longitude: currentUser.coordinates.longitude)
@@ -232,7 +207,6 @@ extension HomeViewModel {
     
     
     func acceptTrip(request: TripRequest) {
-        
         guard let currentUser = self.currentUser else { return }
         let updateTripRequest = UpdateTripRequest(
             driverUid: currentUser.uid,
@@ -252,7 +226,7 @@ extension HomeViewModel {
     
     func startTrip() {
         guard let trip = self.trip else { return }
-        let updateTrip = UpdateTrip(state: .ongoing, travelDetails: trip.travelDetails)
+        let updateTrip = UpdateTrip(state: .ongoing)
         tripService.updateTrip(id: trip.id, update: updateTrip) { success in
             
         }
@@ -261,7 +235,7 @@ extension HomeViewModel {
     
     func completeTrip() {
         guard let trip = self.trip else { return }
-        let updateTrip = UpdateTrip(state: .completed, travelDetails: trip.travelDetails)
+        let updateTrip = UpdateTrip(state: .completed)
         tripService.updateTrip(id: trip.id, update: updateTrip) { success in
             
         }
@@ -281,6 +255,7 @@ extension HomeViewModel {
                     debugPrint("Error in observe driver requests: \(error)")
                 }
             } receiveValue: { request in
+                debugPrint("Driver request change: \(request.state)")
                 if request.state == .cancelled || request.state == .accepted {
                     self.driverRequests.removeAll { e in
                         e.id == request.id
@@ -294,6 +269,39 @@ extension HomeViewModel {
                 }
             }
             .store(in: &cancellables)
+    }
+    
+    func updateTripTravelDetails() {
+        guard let user = currentUser, user.accountType == .driver else { return }
+        guard let trip = trip else { return }
+        guard trip.travelDetails == nil else { return }
+        
+        var travelDetails = TravelDetails()
+        let group = DispatchGroup()
+        
+        group.enter()
+        getDestinationRoute(from: user.coordinates.toCLLocationCoordinate2D(), to: trip.pickupLocation.toCLLocationCoordinate2D()) { route in
+            travelDetails.travelTimeToPickup = Int(route.expectedTravelTime / 60)
+            travelDetails.distanceToPickup = route.distance
+            group.leave()
+        }
+        
+        group.enter()
+        getDestinationRoute(from: trip.pickupLocation.toCLLocationCoordinate2D(), to: trip.dropoffLocation.toCLLocationCoordinate2D()) { route in
+            travelDetails.travelTimeToDropoff = Int(route.expectedTravelTime / 60)
+            travelDetails.distanceToDropoff = route.distance
+            group.leave()
+        }
+        
+        group.notify(queue: .main) {
+            debugPrint("Travel Details: \(travelDetails)")
+            let updateTrip = UpdateTrip(travelDetails: travelDetails)
+            self.tripService.updateTrip(id: trip.id, update: updateTrip) { success in
+                self.trip?.travelDetails = travelDetails
+            }
+        }
+        
+        
     }
     
     

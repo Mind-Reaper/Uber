@@ -63,17 +63,17 @@ extension HomeView {
             
             
             RideRequestView(
-                isPresented: (mapState == .locationSelected && isRider).asBinding
+                isPresented: (mapState.isLocationSelected && isRider).asBinding
             )
             
             TripRequestedView(
-                isPresented: (mapState == .tripRequested && riderRequest != nil && isRider)
+                isPresented: (mapState.isTripRequested && riderRequest != nil && isRider)
                     .asBinding,
                 tripRequest: riderRequest ?? TripRequest.empty()
             )
             
             TripAcceptedView(
-                isPresented: (mapState == .tripAccepted && trip != nil && isRider).asBinding,
+                isPresented: (mapState.isTripAccepted && trip != nil && isRider).asBinding,
                 trip: trip ?? Trip.empty()
             )
             
@@ -84,73 +84,19 @@ extension HomeView {
             
             
             AcceptTripView(
-                isPresented: (mapState == .tripRequested && !driverRequests.isEmpty && isDriver)
+                isPresented: (mapState.isTripRequested && !driverRequests.isEmpty && isDriver)
                     .asBinding,
                 request: driverRequests.first ?? TripRequest.empty()
             )
             
             PickupView(
-                isPresented: (mapState == .tripAccepted && trip != nil && isDriver)
+                isPresented: (mapState.isTripAccepted && trip != nil && isDriver)
                     .asBinding,
                 trip: trip ?? Trip.empty()
             )
             
             
-            
-            
-            
-//            if let user = authViewModel.currentUser, user.accountType == .rider {
-//                if mapState == .locationSelected {
-////                    RideRequestView()
-////                        .transition(.move(edge: .bottom))
-//                } else if homeViewModel.riderRequest != nil {
-//                    TripRequestedView(
-//                        isPresented: Binding<Bool>(get: {mapState == .tripRequested}, set: { _, __ in
-//                            
-//                        }),
-//                        tripRequest: homeViewModel.riderRequest!
-//                    )
-//                    
-//                } else if homeViewModel.trip != nil {
-//                    
-//                    TripAcceptedView(
-//                        isPresented: Binding<Bool>(get: {mapState == .tripAccepted}, set: { _ in
-//                            
-//                        }),
-//                        trip: homeViewModel.trip!
-//                    )
-//                    
-//                    
-//                    TripCancelledView(isPresented: Binding<Bool>(get: {mapState == .tripCancelled}, set: { _ in
-//                        
-//                    }))
-//                }
-//            }
-//            
-//            if authViewModel.currentUser?.accountType == .driver, !homeViewModel.driverRequests.isEmpty {
-//                AcceptTripView(
-//                    isPresented:  Binding<Bool>(get: {mapState == .tripRequested}, set: { _, __ in
-//                        
-//                    }),
-//                    request: homeViewModel.driverRequests.first!
-//                )
-//                
-//                if (homeViewModel.trip != nil) {
-//                    PickupView(
-//                        isPresented:  Binding<Bool>(get: {mapState == .tripAccepted}, set: { _, __ in
-//                            
-//                        }),
-//                        trip: homeViewModel.trip!
-//                    )
-//                    
-//                    TripCancelledView(isPresented: Binding<Bool>(get: {mapState == .tripCancelled}, set: { _ in
-//                        
-//                    }))
-//                }
-//                
-//               
-//                
-//            }
+        
         }
         .onReceive(LocationManager.shared.$userLocation) { location in
             if let location = location {
@@ -176,7 +122,7 @@ extension HomeView {
                 case .completed:
                     self.mapState = .noInput
                 case .accepted, .ongoing:
-                    self.mapState = .tripAccepted
+                    self.mapState = .tripAccepted(pickup: trip.pickupLocation, dropoff: trip.dropoffLocation)
                 case .cancelled:
                     self.mapState = .tripCancelled
                 }
@@ -186,16 +132,19 @@ extension HomeView {
            
             guard let user = authViewModel.currentUser else { return }
             
-            if user.accountType == .rider, riderRequest?.state == .requested {
-                self.mapState = .tripRequested
+            
+            guard homeViewModel.trip == nil || homeViewModel.trip?.state == .completed || homeViewModel.trip?.state == .cancelled else {
+                return
             }
             
-            if user.accountType == .driver, !driverRequests.isEmpty {
-                self.mapState = .tripRequested
+            if user.accountType == .rider, riderRequest?.state == .requested {
+                self.mapState = .tripRequested(pickup: riderRequest!.pickupLocation, dropoff: riderRequest!.dropoffLocation)
+            } else if user.accountType == .driver, let driverRequest = driverRequests.first {
+                self.mapState = .tripRequested(pickup: driverRequest.pickupLocation, dropoff: driverRequest.dropoffLocation)
+            } else {
+                self.mapState = .noInput
             }
-                
-              
-           
+ 
         }
     }
 }

@@ -210,7 +210,7 @@ class SupabaseTripService: TripService {
             .select()
             .eq("rider_uid", value: riderUid)
             .in("state", values: [TripRequestState.requested.rawValue])
-            .single()
+            .limit(1)
             
         let changes =  channel.postgresChange(
             AnyAction.self,
@@ -222,9 +222,9 @@ class SupabaseTripService: TripService {
         Task {
             do {
                 
-                let currentTripRequest: TripRequest? = try await tripPostgres.execute().value
+                let tripRequests: [TripRequest] = try await tripPostgres.execute().value
                 
-                if let currentTripRequest = currentTripRequest {
+                if let currentTripRequest = tripRequests.first {
                     subject.send(currentTripRequest)
                 }
                 
@@ -270,8 +270,7 @@ class SupabaseTripService: TripService {
         let changes =  channel.postgresChange(
             AnyAction.self,
             schema: "public",
-            table: tripRequestsTable,
-            filter: .eq("state", value: TripRequestState.requested.rawValue)
+            table: tripRequestsTable
         )
         
         Task {
@@ -311,71 +310,6 @@ class SupabaseTripService: TripService {
     
     
   
-    
-//    func addTripObserver(forDriver driverUid: String) -> AnyPublisher<Trip,  Error> {
-//        let subject = PassthroughSubject<Trip, Error>()
-//        let channel = SupabaseManager.channel(tripsChannel)
-//        
-//        let tripPostgres = SupabaseManager
-//            .table(tableName)
-//            .select()
-//            .eq("driver_uid", value: driverUid)
-//            .in("state", values: [TripState.requested.rawValue, TripState.accepted.rawValue])
-//            .single()
-//            
-//        
-//        let changes = channel.postgresChange(
-//            AnyAction.self,
-//            schema: "public",
-//            table: tripsTable,
-//            filter: .eq("driver_uid", value: driverUid)
-//        )
-//        
-//        Task {
-//            do {
-//                
-//                let currentTrip: Trip? = try await tripPostgres.execute().value
-//                
-//                if let currentTrip = currentTrip {
-//                    subject.send(currentTrip)
-//                }
-//                
-//                
-//                await channel.subscribe()
-//                
-//                 for try await change in changes {
-//                     switch change {
-//                     case .insert(let action):
-//                         let trip: Trip = try action.decodeRecord(as: Trip.self, decoder: JSONDecoder())
-//                         subject.send(trip)
-//                     case .update(let action):
-//                         let trip: Trip = try action.decodeRecord(as: Trip.self, decoder: JSONDecoder())
-//                         subject.send(trip)
-//                         
-//                     case .delete(let action):
-//                         debugPrint("Deleted \(action.oldRecord)")
-//                     }
-//                    
-//                }
-//                
-//            } catch {
-//                debugPrint("Error adding trip observer for driver \(error.localizedDescription)")
-//                subject.send(completion: .failure(error))
-//            }
-//        }
-//        
-//        return subject.handleEvents(
-//            receiveCancel: {
-//                Task {
-//                    await channel.unsubscribe()
-//                }
-//            }
-//        )
-//        .eraseToAnyPublisher()
-//        
-//    }
- 
-    
     
     
 }

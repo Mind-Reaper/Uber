@@ -28,10 +28,10 @@ struct HomeView: View {
                     if authViewModel.userSession == nil {
                         LoginView()
                         
-                    } else if let user = authViewModel.currentUser {
+                    } else if let _ = authViewModel.currentUser {
                         
                         ZStack {
-                            SideMenuView(user: user)
+                            SideMenuView()
                                 .background(Color(.background))
                                 .simultaneousGesture(
                                     DragGesture()

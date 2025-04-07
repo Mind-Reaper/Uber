@@ -27,7 +27,7 @@ struct Trip: Identifiable, Codable {
     let tripCost: Double
     let rideType: RideType
     let state: TripState
-    private var _travelDetails: TravelDetails = TravelDetails()
+    var travelDetails: TravelDetails?
     
     
     init(id: String, riderUid: String, driverUid: String, riderName: String, driverName: String, pickupLocation: UberLocation, dropoffLocation: UberLocation, tripCost: Double, rideType: RideType, state: TripState) {
@@ -43,41 +43,7 @@ struct Trip: Identifiable, Codable {
         self.state = state
     }
     
-    var travelDetails: TravelDetails? {
-        return _travelDetails
-    }
-    
-    var distanceToPickup: Double? {
-        get {
-            _travelDetails.distanceToPickup
-        } set {
-            _travelDetails.distanceToPickup = newValue
-        }
-    }
-    var distanceToDropoff: Double? {
-        get {
-            _travelDetails.distanceToDropoff
-        } set {
-            _travelDetails.distanceToDropoff = newValue
-        }
-    }
-    
-    var travelTimeToPickup: Int? {
-        get {
-            _travelDetails.travelTimeToPickup
-        } set {
-          
-            _travelDetails.travelTimeToPickup = newValue
-        }
-    }
-    var travelTimeToDropoff: Int? {
-        get {
-            _travelDetails.travelTimeToDropoff
-        } set {
-            _travelDetails.travelTimeToDropoff = newValue
-        }
-    }
-    
+   
     enum CodingKeys: String, CodingKey {
         case id
         case riderUid = "rider_uid"
@@ -89,7 +55,7 @@ struct Trip: Identifiable, Codable {
         case tripCost = "trip_cost"
         case rideType = "ride_type"
         case state
-        case _travelDetails = "travel_details"
+        case travelDetails = "travel_details"
     }
     
     

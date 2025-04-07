@@ -8,39 +8,44 @@
 import SwiftUI
 
 struct SideMenuView: View {
+
     
-    private let user: AppUser
-    
-    init(user: AppUser) {
-        self.user = user
-    }
-    
+    @State private var driverAlertShown: Bool = false
+    @EnvironmentObject var authViewModel: AuthViewModel
+
+  
     var body: some View {
-       
+        
+        if let user = authViewModel.currentUser {
+            
             VStack {
                 // header view
                 
-                VStack (alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: 32) {
                     // user info
                     UserTile(user: user)
-                    .padding(.bottom)
+                        .padding(.bottom)
                     
                     // become a driver
                     
-                    VStack (alignment: .leading, spacing: 16) {
-                        Text("Do more with your account")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.gray)
-                        
-                        HStack {
-                            Image(systemName: "dollarsign.circle")
-                                .font(.title2)
-                                .imageScale(.medium)
+                    if user.accountType == .rider {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Do more with your account")
+                                .font(.footnote)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.gray)
                             
-                            Text("Earn By Driving")
-                                .font(.system(size: 16, weight: .semibold))
-                                .padding()
+                            HStack {
+                                Image(systemName: "dollarsign.circle")
+                                    .font(.title2)
+                                    .imageScale(.medium)
+                                
+                                Text("Earn By Driving")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .padding()
+                            }.onTapGesture {
+                                driverAlertShown = true
+                            }
                         }
                     }
                 }.frame(maxWidth: .infinity, alignment: .leading)
@@ -56,14 +61,15 @@ struct SideMenuView: View {
                         }
                     }
                 }
-                .navigationDestination(for: SideMenuOptionViewModel.self) { viewModel in
+                .navigationDestination(for: SideMenuOptionViewModel.self) {
+                    viewModel in
                     switch viewModel {
                     case .trips:
                         Text("Trips")
                     case .wallet:
                         Text("Wallet")
                     case .settings:
-                        SettingsView(user: user)
+                        SettingsView()
                             .applyCustomBackground()
                     case .messages:
                         Text("Messages")
@@ -74,15 +80,32 @@ struct SideMenuView: View {
                 
                 Spacer()
                 
-            }.padding(.vertical)
+            }
+            .padding(.vertical)
             .padding(.trailing, UIScreen.main.bounds.width - 316)
+            .confirmationDialog(
+                "Become a Driver",
+                isPresented: $driverAlertShown
+            ) {
+                Button("Proceed") {
+                    driverAlertShown = false
+                    authViewModel.changeAccountToDriver()
+                }
+                Button("Not now", role: .cancel) {
+                    driverAlertShown = false
+                }
+            } message: {
+                Text(
+                    "This action will convert your passenger account to a driver account. Once completed, this change cannot be reversed."
+                )
+            }
+        }
     }
 }
 
 #Preview {
     NavigationStack {
-        SideMenuView(
-            user: AppUser.empty()
-        )
+        SideMenuView()
+        .environmentObject(AuthViewModel(userService: SupabaseUserService()))
     }
 }
