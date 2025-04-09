@@ -16,7 +16,7 @@ enum TripRequestState: String, Codable {
 
 struct TripRequest: Identifiable, Codable, Equatable {
     static func == (lhs: TripRequest, rhs: TripRequest) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id 
     }
     
     let id: String

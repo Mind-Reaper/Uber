@@ -16,5 +16,6 @@ protocol UserService {
     
     func fetchUser()
     func fetchDrivers(completion: @escaping ([AppUser]?) -> Void)
+    func updateUser(uid: String, updateUser: UpdateUser, completion: @escaping (AppUser?) -> Void)
     
 }

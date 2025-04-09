@@ -135,9 +135,7 @@ class AuthViewModel: ObservableObject {
                     .eq("uid", value: user.uid)
                     .execute()
 
-                await MainActor.run {
-                    fetchAppUser()
-                }
+                fetchAppUser()
 
             } catch {
                 debugPrint(

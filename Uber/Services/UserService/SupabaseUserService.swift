@@ -64,5 +64,29 @@ class  SupabaseUserService: UserService {
         }
     }
     
+    func updateUser(uid: String, updateUser: UpdateUser, completion: @escaping (AppUser?) -> Void) {
+        Task {
+            do {
+                let appUser: AppUser = try await SupabaseManager.table("users")
+                .update(updateUser)
+                .eq("uid", value: uid)
+                .single()
+                .execute().value
+                
+                debugPrint("Updated user with uid \(uid)")
+                await MainActor.run {
+                    self.user = appUser
+                    completion(appUser)
+                }
+
+            } catch {
+                debugPrint("Error updating user \(error.localizedDescription)")
+                await MainActor.run {
+                    completion(nil)
+                }
+            }
+        }
+    }
+    
 }
 

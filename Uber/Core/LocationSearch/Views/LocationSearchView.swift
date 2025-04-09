@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct LocationSearchView: View {
     
@@ -70,12 +71,19 @@ struct LocationSearchView: View {
                 Spacer()
             }
            
-            
-            
         }.onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 self.focusedField = .dropoff
             }
+        }
+        .onReceive(Publishers.CombineLatest( homeViewModel.$selectedPickupLocation, homeViewModel.$selectedDropoffLocation)) { pickup, dropoff in
+            
+            if pickup == nil && dropoff != nil {
+                focusedField = .pickup
+            } else if pickup != nil && dropoff == nil {
+                focusedField = .dropoff
+            }
+            
         }
     }
 }

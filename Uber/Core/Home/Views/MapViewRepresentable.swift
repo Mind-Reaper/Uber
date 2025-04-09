@@ -114,6 +114,7 @@ extension MapViewRepresentable {
         func mapView(
             _ mapView: MKMapView, didUpdate userLocation: MKUserLocation
         ) {
+            guard self.userLocationCoordinate == nil else { return }
             self.userLocationCoordinate = userLocation.coordinate
             let region = MKCoordinateRegion(
                 center: CLLocationCoordinate2D(
