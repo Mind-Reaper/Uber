@@ -65,7 +65,7 @@ struct SideMenuView: View {
                     viewModel in
                     switch viewModel {
                     case .trips:
-                        Text("Trips")
+                        TripsView().applyCustomBackground()
                     case .wallet:
                         Text("Wallet")
                     case .settings:

@@ -108,6 +108,7 @@ extension HomeView {
             if pickup != nil && dropoff != nil {
                 withAnimation {
                     self.mapState = .locationSelected
+                    showSideMenuBinding.wrappedValue = false
                 }
             }
         }

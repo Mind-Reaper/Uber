@@ -19,9 +19,13 @@ class HomeViewModel: NSObject, ObservableObject {
 
     @Published var riderRequest: TripRequest?
     @Published var driverRequests: [TripRequest] = []
+    
+    @Published var pastTrips: [Trip] = []
 
     private var cancellables = Set<AnyCancellable>()
     private var currentUser: AppUser?
+    
+   
 
     // MARK: - Location Search Properties
 
@@ -105,7 +109,14 @@ class HomeViewModel: NSObject, ObservableObject {
                 self.updateTripTravelDetails()
             }
             .store(in: &cancellables)
-
+    }
+    
+    
+    func getPastTrips() {
+        guard let currentUser = currentUser else { return }
+        tripService.fetchTrips(for: currentUser) { trips in
+            self.pastTrips = trips
+        }
     }
 
 }

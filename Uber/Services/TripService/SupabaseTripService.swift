@@ -60,29 +60,30 @@ class SupabaseTripService: TripService {
         }
     }
     
-//    func fetchTrips(forDriver driverUid: String, completion: @escaping ([Trip]) -> Void) {
-//        Task {
-//            do {
-//                let trips: [Trip] = try await SupabaseManager
-//                    .table(tripsTable)
-//                    .select()
-//                    .eq("driver_uid", value: driverUid)
-//                    .execute()
-//                    .value
-//    
-//                debugPrint("Fetched \(trips.count) trips for driver")
-//                await MainActor.run {
-//                     completion(trips)
-//                }
-//            } catch {
-//                debugPrint("Error fetching trips for driver \(error.localizedDescription)")
-//                await MainActor.run {
-//                     completion([])
-//                }
-//            }
-//        }
-//    }
-//
+    func fetchTrips(for user: AppUser, completion: @escaping ([Trip]) -> Void) {
+        Task {
+            do {
+                let trips: [Trip] = try await SupabaseManager
+                    .table(tripsTable)
+                    .select()
+                    .or("rider_uid.eq.\(user.uid),driver_uid.eq.\(user.uid)")
+                    .in("state", values: [TripState.completed.rawValue, TripState.cancelled.rawValue])
+                    .execute()
+                    .value
+    
+                debugPrint("Fetched \(trips.count) trips for user")
+                await MainActor.run {
+                     completion(trips)
+                }
+            } catch {
+                debugPrint("Error fetching trips for user \(error.localizedDescription)")
+                await MainActor.run {
+                     completion([])
+                }
+            }
+        }
+    }
+
     
     
     func fetchTripRequests(forDriver driverUid: String, completion: @escaping ([TripRequest]) -> Void) {

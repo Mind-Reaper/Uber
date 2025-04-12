@@ -17,7 +17,7 @@ enum SideMenuOptionViewModel: Int, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .trips:
-            return "Your Trips"
+            return "Activity"
         case .wallet:
             return "Wallet"
         case .settings:

@@ -16,11 +16,10 @@ protocol TripService {
     
     func updateTrip(id: String, update: UpdateTrip, completion: @escaping (Bool) -> Void)
     
-//    func fetchTrips(forDriver driverUid: String, completion: @escaping ([Trip]) -> Void)
+    func fetchTrips(for user: AppUser, completion: @escaping ([Trip]) -> Void)
     func fetchTripRequests(forDriver driverUid: String, completion: @escaping ([TripRequest]) -> Void)
     
     func addTripObserver(for user: AppUser) -> AnyPublisher<Trip, Error>
-//    func addTripObserver(forDriver driverUid: String) -> AnyPublisher<Trip, Error>
     func addTripRequestObserver(forRider riderUid: String) -> AnyPublisher<TripRequest, Error>
     func addTripRequestObserver(forDriver driver: String) -> AnyPublisher<TripRequest, Error>
     

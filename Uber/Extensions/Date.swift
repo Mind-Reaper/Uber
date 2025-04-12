@@ -16,4 +16,10 @@ extension Date {
         return formatter.string(from: self)
     }
     
+    var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM dd"
+        return formatter.string(from: self)
+    }
+    
 }

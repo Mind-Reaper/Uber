@@ -27,10 +27,11 @@ struct Trip: Identifiable, Codable {
     let tripCost: Double
     let rideType: RideType
     let state: TripState
+    let createdAt: Date
     var travelDetails: TravelDetails?
     
     
-    init(id: String, riderUid: String, driverUid: String, riderName: String, driverName: String, pickupLocation: UberLocation, dropoffLocation: UberLocation, tripCost: Double, rideType: RideType, state: TripState) {
+    init(id: String, riderUid: String, driverUid: String, riderName: String, driverName: String, pickupLocation: UberLocation, dropoffLocation: UberLocation, tripCost: Double, rideType: RideType, state: TripState, createdAt: Date) {
         self.id = id
         self.riderUid = riderUid
         self.driverUid = driverUid
@@ -41,6 +42,7 @@ struct Trip: Identifiable, Codable {
         self.tripCost = tripCost
         self.rideType = rideType
         self.state = state
+        self.createdAt = createdAt
     }
     
    
@@ -55,6 +57,7 @@ struct Trip: Identifiable, Codable {
         case tripCost = "trip_cost"
         case rideType = "ride_type"
         case state
+        case createdAt = "created_at"
         case travelDetails = "travel_details"
     }
     
@@ -77,9 +80,10 @@ struct Trip: Identifiable, Codable {
                     latitude: 22.3964, longitude: 114.1095
                 )
             ),
-            tripCost: 53.0,
+            tripCost: 4700,
             rideType: .uberX,
-            state: .accepted
+            state: .accepted,
+            createdAt: Date()
         )
     }
 }
